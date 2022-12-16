@@ -4,6 +4,7 @@ import pandas as pd
 import subprocess
 import ta
 from datetime import datetime, timezone
+import os
 
 period, interval = '5y', '1d'
 #period, interval = '1d', '15m'
@@ -28,4 +29,5 @@ df.to_excel(writer, sheet_name='Sheet1')
 writer.close()
 
 # subprocess.call("C:\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE price.xlsx")
-subprocess.call("C:\\Program Files\\Microsoft Office 15\\root\\office15\\EXCEL.EXE price.xlsx")
+# subprocess.call("C:\\Program Files\\Microsoft Office 15\\root\\office15\\EXCEL.EXE price.xlsx")
+os.startfile("price.xlsx")
