@@ -7,8 +7,8 @@ hist_top_eth = 5827000
 last_btc_order = 22711000
 last_eth_order = 1593000
 
-btc_amt = 0.14984602
-eth_amt = 2.62 + 0.26439329
+btc_amt = 0.15439271
+eth_amt = 2.62 + 0.32838130
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
