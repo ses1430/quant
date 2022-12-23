@@ -4,6 +4,7 @@ import FinanceDataReader as fdr
 import datetime as dt
 import subprocess
 import ta
+import os
 
 stocks = {item.split('\t')[0]:item.split('\t')[1] for item in open('kor_ticker.dat', 'r', encoding='utf-8').readlines()}
 
@@ -28,5 +29,6 @@ writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='Sheet1')
 writer.close()
 
+# subprocess.call("C:\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE kdrx.xlsx")
 # subprocess.call("C:\\Program Files\\Microsoft Office 15\\root\\office15\\EXCEL.EXE kdrx.xlsx")
-subprocess.call("C:\\Program Files\\Microsoft Office 15\\root\\office15\\EXCEL.EXE kdrx.xlsx")
+os.startfile("kdrx.xlsx")
