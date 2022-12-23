@@ -51,4 +51,3 @@ T
 VZ
 IONQ
 INMD
-PKG

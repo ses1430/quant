@@ -8,10 +8,11 @@ import ta
 period, interval = '20Y', '1D'
 
 # 보유종목
-stocks = ['RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE']
+stocks = ['RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE','7974.T']
 data = yf.download(stocks, period=period, interval=interval)
 df = data['Close']
 df = df[stocks]
+df = df.fillna(method='ffill')
 
 # RSI 계산
 rsi = {}
