@@ -4,8 +4,8 @@ import json
 hist_top_btc = 82700000
 hist_top_eth = 5827000
 
-last_btc_order = 22711000
-last_eth_order = 1593000
+last_btc_order = 21994000
+last_eth_order = 1576000
 
 btc_amt = 0.15439271
 eth_amt = 2.62 + 0.32838130
