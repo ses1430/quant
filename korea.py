@@ -6,21 +6,29 @@ import subprocess
 import ta
 import os
 
-stocks = {item.split('\t')[0]:item.split('\t')[1] for item in open('kor_ticker.dat', 'r', encoding='utf-8').readlines()}
+stocks = {item.split('\t')[0]:item.split('\t')[1].strip() for item in open('kor_ticker.dat', 'r', encoding='utf-8').readlines()}
 
-start_dt = (dt.datetime.now() - dt.timedelta(days=1850)).strftime('%Y-%m-%d')
+start_dt = (dt.datetime.now() - dt.timedelta(days=365*5+10)).strftime('%Y-%m-%d')
 end_dt = dt.datetime.now().strftime('%Y-%m-%d')
 
 df_list = [fdr.DataReader(t, start_dt, end_dt)['Close'] for t in stocks]
-df = pd.concat(df_list, axis=1)
-df.columns = list(stocks.values())
-#df = data.replace({np.nan: None})
+data = pd.concat(df_list, axis=1)
+data.columns = list(stocks.values())
+
+# 주말도 나오게
+days = [data.index[0] + dt.timedelta(days=i) for i in range((data.index[-1] - data.index[0]).days + 1)]
+df_days = pd.DataFrame(days)
+df_days.index = days
+
+df = pd.concat([data, df_days], axis=1)
+df = df.fillna(method='ffill')[list(stocks.values())]
 
 rsi = {}
-for column in df.columns:
-    rsi[column] = ta.momentum.rsi(df[column])[-1]
+for column in data.columns:
+    rsi[column] = ta.momentum.rsi(data[column])[-1]
+df_rsi = pd.DataFrame(data=[rsi])
 
-df = pd.concat([df, pd.DataFrame(data=[rsi])]).iloc[::-1].T
+df = pd.concat([df, df_rsi]).iloc[::-1].T
 df.rename(columns={df.columns[0]:'RSI'}, inplace=True)
 
 writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
