@@ -7,14 +7,13 @@ from datetime import datetime, timezone, timedelta
 import os
 
 period, interval = '1y', '1d'
-#period, interval = '1d', '15m'
 
 # 보유종목
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
 data = yf.download(stocks, period=period, interval=interval)
 
-# 종가만 추출, 내가 지정한 순서대로 나오게
+# 종가만 추출
 df = data['Close']
 
 # 주말도 나오게
