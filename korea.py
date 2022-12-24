@@ -36,7 +36,4 @@ writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
 #최근 120일치만 가져오기
 df.to_excel(writer, sheet_name='Sheet1')
 writer.close()
-
-# subprocess.call("C:\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE kdrx.xlsx")
-# subprocess.call("C:\\Program Files\\Microsoft Office 15\\root\\office15\\EXCEL.EXE kdrx.xlsx")
 os.startfile("kdrx.xlsx")
