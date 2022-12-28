@@ -4,11 +4,14 @@ import json
 hist_top_btc = 82700000
 hist_top_eth = 5827000
 
+avg_hold_btc = 46620107
+avg_hold_eth = 1895350
+
 last_btc_order = 21994000
 last_eth_order = 1576000
 
 btc_amt = 0.15439271
-eth_amt = 2.62 + 0.32838130
+eth_amt = 2.62 + 0.32882208
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
@@ -27,5 +30,8 @@ print('KRW-ETH : {}, 구매대비 : {}%, 어제대비 : {}%'.format(eth_cur_pric
 
 print('BTC 전고점대비 : {}%'.format(round((btc_cur_price-hist_top_btc)/hist_top_btc*100, 1)))
 print('ETH 전고점대비 : {}%'.format(round((eth_cur_price-hist_top_eth)/hist_top_eth*100, 1)))
+
+print('BTC 수익률 : {}%'.format(round((btc_cur_price-avg_hold_btc)/avg_hold_btc*100, 1)))
+print('ETH 수익률 : {}%'.format(round((eth_cur_price-avg_hold_eth)/avg_hold_eth*100, 1)))
 
 print('TOTAL ACCOUNT :', round((krw_btc['trade_price'] * btc_amt + krw_eth['trade_price'] * eth_amt)/10000, 1))
