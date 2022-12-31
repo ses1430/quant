@@ -6,7 +6,7 @@ import ta
 from datetime import datetime, timezone, timedelta
 import os
 
-period, interval = '1y', '1d'
+period, interval = '20y', '1d'
 
 # 보유종목
 stocks = open('ticker.txt','r').readlines()
@@ -16,7 +16,7 @@ data = yf.download(stocks, period=period, interval=interval)
 # 종가만 추출
 df = data['Close']
 
-# 주말도 나오게
+# 휴일도 나오게
 days = [df.index[0] + timedelta(days=i) for i in range((df.index[-1] - df.index[0]).days + 1)]
 df_days = pd.DataFrame(days)
 df_days.index = days
