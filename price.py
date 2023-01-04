@@ -5,13 +5,17 @@ import subprocess
 import ta
 from datetime import datetime, timezone, timedelta
 import os
+import sys
 
-period, interval = '20y', '1d'
+period, interval, prepost = '20y', '1d', False
+if sys.argv[1] == '1':  
+    print('prepost true')
+    prepost = True
 
 # 보유종목
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
-data = yf.download(stocks, period=period, interval=interval)
+data = yf.download(stocks, period=period, interval=interval, prepost=prepost)
 
 # 종가만 추출
 df = data['Close']
