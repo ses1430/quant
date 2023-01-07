@@ -28,8 +28,19 @@ for column in data.columns:
     rsi[column] = ta.momentum.rsi(data[column])[-1]
 df_rsi = pd.DataFrame(data=[rsi])
 
-df = pd.concat([df, df_rsi]).iloc[::-1].T
-df.rename(columns={df.columns[0]:'RSI'}, inplace=True)
+# rsi, bollinger band 계산
+rsi, lband, hband, pband = {}, {}, {}, {}
+window, window_dev = 14, 2
+
+for ticker in data.columns:
+    ticker_data = data[ticker]
+    rsi[ticker] = ta.momentum.rsi(ticker_data)[-1]
+    lband[ticker] = ta.volatility.bollinger_lband(ticker_data, window, window_dev, True)[-1]
+    hband[ticker] = ta.volatility.bollinger_hband(ticker_data, window, window_dev, True)[-1]
+    pband[ticker] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
+
+df_stat = pd.DataFrame(data=[rsi, lband, hband, pband], index=['RSI','LBAND','HBAND','PBAND'])[::-1]
+df = pd.concat([df, df_stat]).iloc[::-1].T
 
 writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
 
