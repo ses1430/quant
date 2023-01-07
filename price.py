@@ -8,7 +8,7 @@ import os
 import sys
 
 period, interval, prepost = '20y', '1d', False
-if sys.argv[1] == '1':  
+if len(sys.argv) > 1 and sys.argv[1] == '1':
     print('prepost true')
     prepost = True
 
