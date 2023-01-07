@@ -29,16 +29,30 @@ df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
 
 # rsi, bollinger band 계산
-rsi, lband, hband, pband = {}, {}, {}, {}
+stat = {}
 window, window_dev = 14, 2
-for ticker in stocks:
-    ticker_data = data['Close'][ticker]
-    rsi[ticker] = ta.momentum.rsi(ticker_data)[-1]
-    lband[ticker] = ta.volatility.bollinger_lband(ticker_data, window, window_dev, True)[-1]
-    hband[ticker] = ta.volatility.bollinger_hband(ticker_data, window, window_dev, True)[-1]
-    pband[ticker] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
 
-df_stat = pd.DataFrame(data=[rsi, lband, hband, pband], index=['RSI','LBAND','HBAND','PBAND'])[::-1]
+for ticker in stocks:
+    stat[ticker] = {}
+    t = data['Close'][ticker]       
+
+    '''
+    i = yf.Ticker(ticker).info
+    try:
+        stat[ticker]['Beta']    = i['beta']
+        stat[ticker]['P/E']     = i['trailingPE']
+        stat[ticker]['Fwd P/E'] = i['forwardPE']    
+        stat[ticker]['PEG']     = i['pegRatio']
+    except KeyError:
+        pass
+    '''
+
+    stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
+    stat[ticker]['BB.L'] = ta.volatility.bollinger_lband(t, window, window_dev, True)[-1]
+    stat[ticker]['BB.H'] = ta.volatility.bollinger_hband(t, window, window_dev, True)[-1]
+    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1]
+
+df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
 
 writer = pd.ExcelWriter('price.xlsx', engine='xlsxwriter')
