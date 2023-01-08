@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 import os
 import sys
 
-period, interval, prepost = '20y', '1d', False
+period, interval, prepost = '1y', '1d', False
 if len(sys.argv) > 1 and sys.argv[1] == '1':
     print('prepost true')
     prepost = True
@@ -34,19 +34,7 @@ window, window_dev = 14, 2
 
 for ticker in stocks:
     stat[ticker] = {}
-    t = data['Close'][ticker]       
-
-    '''
-    i = yf.Ticker(ticker).info
-    try:
-        stat[ticker]['Beta']    = i['beta']
-        stat[ticker]['P/E']     = i['trailingPE']
-        stat[ticker]['Fwd P/E'] = i['forwardPE']    
-        stat[ticker]['PEG']     = i['pegRatio']
-    except KeyError:
-        pass
-    '''
-
+    t = data['Close'][ticker]
     stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
     stat[ticker]['BB.L'] = ta.volatility.bollinger_lband(t, window, window_dev, True)[-1]
     stat[ticker]['BB.H'] = ta.volatility.bollinger_hband(t, window, window_dev, True)[-1]
