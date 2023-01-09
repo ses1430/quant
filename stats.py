@@ -17,8 +17,7 @@ for ticker in stocks:
         info = yf.Ticker(ticker).stats()
         stats[ticker]['Beta']    = info['defaultKeyStatistics']['beta']
         stats[ticker]['P/E']     = info['summaryDetail']['trailingPE']
-        stats[ticker]['Fwd P/E'] = info['summaryDetail']['forwardPE']    
-        stats[ticker]['PEG']     = info['defaultKeyStatistics']['pegRatio']
+        stats[ticker]['Fwd P/E'] = info['summaryDetail']['forwardPE']
     except KeyError as e:
         pass
 
