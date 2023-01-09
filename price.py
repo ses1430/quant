@@ -1,11 +1,8 @@
-from functools import total_ordering
 import yfinance as yf
 import pandas as pd
-import subprocess
 import ta
 from datetime import datetime, timezone, timedelta
 import os
-import sys
 
 period = '1y'
 interval = '1d'

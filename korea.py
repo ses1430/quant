@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import FinanceDataReader as fdr
 import datetime as dt
-import subprocess
 import ta
 import os
 
@@ -23,28 +22,21 @@ df_days.index = days
 df = pd.concat([data, df_days], axis=1)
 df = df.fillna(method='ffill')[list(stocks.values())]
 
-rsi = {}
-for column in data.columns:
-    rsi[column] = ta.momentum.rsi(data[column])[-1]
-df_rsi = pd.DataFrame(data=[rsi])
-
 # rsi, bollinger band 계산
-rsi, lband, hband, pband = {}, {}, {}, {}
+stat = {}
 window, window_dev = 14, 2
 
 for ticker in data.columns:
+    stat[ticker] = {}
     ticker_data = data[ticker]
-    rsi[ticker] = ta.momentum.rsi(ticker_data)[-1]
-    lband[ticker] = ta.volatility.bollinger_lband(ticker_data, window, window_dev, True)[-1]
-    hband[ticker] = ta.volatility.bollinger_hband(ticker_data, window, window_dev, True)[-1]
-    pband[ticker] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
 
-df_stat = pd.DataFrame(data=[rsi, lband, hband, pband], index=['RSI','LBAND','HBAND','PBAND'])[::-1]
+    stat[ticker]['RSI'] = ta.momentum.rsi(ticker_data)[-1]
+    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
+
+df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
 
 writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
-
-#최근 120일치만 가져오기
 df.to_excel(writer, sheet_name='Sheet1')
 writer.close()
 os.startfile("kdrx.xlsx")

@@ -1,7 +1,5 @@
-from functools import total_ordering
 import yfinance as yf
 import pandas as pd
-import subprocess
 from datetime import datetime, timezone, timedelta
 import ta
 import os
@@ -22,16 +20,15 @@ df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
 
 # rsi, bollinger band 계산
-rsi, lband, hband, pband = {}, {}, {}, {}
+stat = {}
 window, window_dev = 14, 2
 for ticker in stocks:
+    stat[ticker] = {}
     ticker_data = data['Close'][ticker]
-    rsi[ticker] = ta.momentum.rsi(ticker_data)[-1]
-    lband[ticker] = ta.volatility.bollinger_lband(ticker_data, window, window_dev, True)[-1]
-    hband[ticker] = ta.volatility.bollinger_hband(ticker_data, window, window_dev, True)[-1]
-    pband[ticker] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
+    stat[ticker]['RSI'] = ta.momentum.rsi(ticker_data)[-1]
+    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1]
 
-df_stat = pd.DataFrame(data=[rsi, lband, hband, pband], index=['RSI','LBAND','HBAND','PBAND'])[::-1]
+df_stat = pd.DataFrame(data=stat)[::-1]
 
 df = pd.concat([df, df_stat]).iloc[::-1].T
 df.rename(columns={df.columns[0]:'RSI'}, inplace=True)
