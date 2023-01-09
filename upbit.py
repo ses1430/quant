@@ -25,13 +25,13 @@ krw_eth = get_ticker_price('krw-eth')
 btc_cur_price = krw_btc['trade_price']
 eth_cur_price = krw_eth['trade_price']
 
-print('KRW-BTC : {}, 구매대비 : {}%, 어제대비 : {}%'.format(btc_cur_price, round((btc_cur_price-last_btc_order)/last_btc_order*100, 1), round(krw_btc['signed_change_rate'] * 100, 1)))
-print('KRW-ETH : {}, 구매대비 : {}%, 어제대비 : {}%'.format(eth_cur_price, round((eth_cur_price-last_eth_order)/last_eth_order*100, 1), round(krw_eth['signed_change_rate'] * 100, 1)))
+print('KRW-BTC : {}, 구매대비 : {}%, 어제대비 : {}%'.format(btc_cur_price, round((btc_cur_price-last_btc_order)/last_btc_order*100, 2), round(krw_btc['signed_change_rate'] * 100, 2)))
+print('KRW-ETH : {}, 구매대비 : {}%, 어제대비 : {}%'.format(eth_cur_price, round((eth_cur_price-last_eth_order)/last_eth_order*100, 2), round(krw_eth['signed_change_rate'] * 100, 2)))
 
-print('BTC 전고점대비 : {}%'.format(round((btc_cur_price-hist_top_btc)/hist_top_btc*100, 1)))
-print('ETH 전고점대비 : {}%'.format(round((eth_cur_price-hist_top_eth)/hist_top_eth*100, 1)))
+print('BTC 전고점대비 : {}%'.format(round((btc_cur_price-hist_top_btc)/hist_top_btc*100, 2)))
+print('ETH 전고점대비 : {}%'.format(round((eth_cur_price-hist_top_eth)/hist_top_eth*100, 2)))
 
-print('BTC 수익률 : {}%'.format(round((btc_cur_price-avg_hold_btc)/avg_hold_btc*100, 1)))
-print('ETH 수익률 : {}%'.format(round((eth_cur_price-avg_hold_eth)/avg_hold_eth*100, 1)))
+print('BTC 수익률 : {}%'.format(round((btc_cur_price-avg_hold_btc)/avg_hold_btc*100, 2)))
+print('ETH 수익률 : {}%'.format(round((eth_cur_price-avg_hold_eth)/avg_hold_eth*100, 2)))
 
-print('TOTAL ACCOUNT :', round((krw_btc['trade_price'] * btc_amt + krw_eth['trade_price'] * eth_amt)/10000, 1))
+print('TOTAL ACCOUNT :', round((krw_btc['trade_price'] * btc_amt + krw_eth['trade_price'] * eth_amt)/10000, 2))

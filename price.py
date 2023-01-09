@@ -11,7 +11,7 @@ period, interval = '20y', '1d'
 # 보유종목
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
-data = yf.download(stocks, period=period, interval=interval)
+data = yf.download(stocks, period=period, interval=interval, prepost=True)
 
 # 종가만 추출
 df = data['Close']
