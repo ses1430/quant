@@ -5,14 +5,13 @@ from datetime import datetime, timezone, timedelta
 import os
 
 period = '1y'
-interval = '1d'
 
 # target tickers
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
-data = yf.download(stocks, period=period, interval=interval)
+data = yf.download(stocks, period=period, rounding=True)
 
-# i need only "Close price"
+# I need only "Close price"
 df = data['Close']
 
 # make data with 365days
