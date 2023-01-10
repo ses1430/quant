@@ -4,11 +4,11 @@ from datetime import datetime, timezone, timedelta
 import ta
 import os
 
-period, interval = '1Y', '1D'
+period = '1y'
 
 # 보유종목
 stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE','7974.T']
-data = yf.download(stocks, period=period, interval=interval)
+data = yf.download(stocks, period=period, rounding=True)
 df = data['Close']
 
 # 주말도 나오게
