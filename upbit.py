@@ -34,4 +34,7 @@ print('ETH 전고점대비 : {}%'.format(round((eth_cur_price-hist_top_eth)/hist
 print('BTC 수익률 : {}%'.format(round((btc_cur_price-avg_hold_btc)/avg_hold_btc*100, 2)))
 print('ETH 수익률 : {}%'.format(round((eth_cur_price-avg_hold_eth)/avg_hold_eth*100, 2)))
 
+print('BTC 잔고 :', round((krw_btc['trade_price'] * btc_amt)/10000, 2))
+print('ETH 잔고 :', round((krw_eth['trade_price'] * eth_amt)/10000, 2))
+
 print('TOTAL ACCOUNT :', round((krw_btc['trade_price'] * btc_amt + krw_eth['trade_price'] * eth_amt)/10000, 2))
