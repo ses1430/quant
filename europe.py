@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 import ta
 import os
 
-period = '1y'
+period = '20y'
 
 # 보유종목
 stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE','7974.T']

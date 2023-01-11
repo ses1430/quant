@@ -4,7 +4,7 @@ import ta
 from datetime import datetime, timezone, timedelta
 import os
 
-period = '1y'
+period = '20y'
 
 # target tickers
 stocks = open('ticker.txt','r').readlines()
