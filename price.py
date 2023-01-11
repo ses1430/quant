@@ -30,7 +30,7 @@ for ticker in stocks:
     stat[ticker] = {}
     t = data['Close'][ticker]
     stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
-    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1]
+    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
