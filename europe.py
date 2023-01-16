@@ -7,11 +7,8 @@ import os
 period = '20y'
 
 # 종목
-stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE']
-data = yf.download(stocks, period=period, rounding=True)
-
-# timezone control & trunc time
-data.index = data.index.tz_localize(None).normalize()
+stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE','7974.T']
+data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
 df = data['Close']
 
 # 주말도 나오게
@@ -21,8 +18,6 @@ df_days.index = days
 
 df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
-
-df.index = df.index.date + timedelta(days=1)
 
 # rsi, bollinger band 계산
 stat = {}

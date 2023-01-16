@@ -9,12 +9,7 @@ period = '20y'
 # target tickers
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
-data = yf.download(stocks, period=period, rounding=True)
-
-# timezone control & trunc time
-data.index = data.index.tz_localize(None).normalize()
-
-# I need only "Close price"
+data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
 df = data['Close']
 
 # make data with 365days
@@ -24,7 +19,6 @@ df_days.index = days
 
 df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
-df.index = df.index.date
 
 # rsi, bollinger band
 stat = {}
