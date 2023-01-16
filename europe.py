@@ -11,7 +11,7 @@ stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE']
 data = yf.download(stocks, period=period, rounding=True)
 
 # timezone control & trunc time
-data.index = data.index.tz_convert('Europe/Paris').normalize()
+data.index = data.index.tz_localize(None).normalize()
 df = data['Close']
 
 # 주말도 나오게
@@ -22,7 +22,7 @@ df_days.index = days
 df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
 
-df.index = df.index.date
+df.index = df.index.date + timedelta(days=1)
 
 # rsi, bollinger band 계산
 stat = {}
