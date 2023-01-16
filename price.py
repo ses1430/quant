@@ -24,6 +24,7 @@ df_days.index = days
 
 df = pd.concat([df, df_days], axis=1)
 df = df.fillna(method='ffill')[stocks]
+df.index = df.index.date
 
 # rsi, bollinger band
 stat = {}
