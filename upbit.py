@@ -1,8 +1,8 @@
 import requests
 import json
 
-hist_top_btc = 82700000
-hist_top_eth = 5827000
+hist_top_btc = 81100000
+hist_top_eth = 5780000
 
 avg_hold_btc = 46620107
 avg_hold_eth = 1895350

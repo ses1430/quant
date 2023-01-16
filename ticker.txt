@@ -52,6 +52,7 @@ CVX
 XOM
 V
 MA
+PYPL
 T
 VZ
 IONQ
