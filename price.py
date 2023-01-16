@@ -11,6 +11,9 @@ stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks]
 data = yf.download(stocks, period=period, rounding=True)
 
+# timezone control & trunc time
+data.index = data.index.tz_localize(None).normalize()
+
 # I need only "Close price"
 df = data['Close']
 

@@ -6,10 +6,13 @@ import os
 
 period = '20y'
 
-# 보유종목
-stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE','7974.T']
-data = yf.download(stocks, period=period, rounding=True)
+# 종목
+stocks = ['^FCHI','RMS.PA','MC.PA','CDI.PA','OR.PA','KER.PA','P911.DE']
+data = yf.download(stocks, period=period, interval="1d", rounding=True)
 df = data['Close']
+
+# 유럽표준시로 변경
+df.index = df.index.tz_convert(None).normalize()
 
 # 주말도 나오게
 days = [df.index[0] + timedelta(days=i) for i in range((df.index[-1] - df.index[0]).days + 1)]
