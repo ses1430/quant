@@ -11,7 +11,7 @@ last_btc_order = 21994000
 last_eth_order = 1576000
 
 btc_amt = 0.15439271
-eth_amt = 2.62 + 0.33022699
+eth_amt = 2.62 + 0.33100314
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker

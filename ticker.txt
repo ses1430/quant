@@ -55,5 +55,4 @@ MA
 PYPL
 T
 VZ
-IONQ
 INMD
