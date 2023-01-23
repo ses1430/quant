@@ -6,7 +6,7 @@ hist_top_btc =  81138408
 hist_top_eth =  5778651
 
 # 현재 수량
-btc_amt = 0.15817614
+btc_amt = 0.15847158
 eth_amt = 2.62 + 0.38228653
 
 def get_ticker_price(ticker):
