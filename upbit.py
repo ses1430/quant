@@ -5,9 +5,9 @@ import json
 hist_top_btc =  81138408
 hist_top_eth =  5778651
 
-# 현재 수량
+
 btc_amt = 0.15847158
-eth_amt = 2.62 + 0.38228653
+eth_amt = 2.62 + 0.38308090
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
