@@ -1,10 +1,12 @@
 import requests
 import json
 
-hist_top_btc = 81100000
-hist_top_eth = 5780000
+# 전고점
+hist_top_btc =  81138408
+hist_top_eth =  5778651
 
-btc_amt = 0.15817614
+
+btc_amt = 0.15847158
 eth_amt = 2.62 + 0.38308090
 
 def get_ticker_price(ticker):
