@@ -8,16 +8,18 @@ import os
 import sys
 
 stocks = [t.strip() for t in open('ticker.txt','r').readlines()]
+tickers = yf.Tickers(stocks).tickers
 stats = {}
 
-for ticker in stocks:
-    stats[ticker] = {}
+for stock in stocks:
+    stats[stock] = {}
+    print(stock, '...')
     
     try:
-        info = yf.Ticker(ticker).stats()
-        stats[ticker]['Beta']    = info['defaultKeyStatistics']['beta']
-        stats[ticker]['P/E']     = info['summaryDetail']['trailingPE']
-        stats[ticker]['Fwd P/E'] = info['summaryDetail']['forwardPE']
+        info = tickers[stock].stats()
+        stats[stock]['Beta']    = info['defaultKeyStatistics']['beta']
+        stats[stock]['P/E']     = info['summaryDetail']['trailingPE']
+        stats[stock]['Fwd P/E'] = info['summaryDetail']['forwardPE']
     except KeyError as e:
         pass
 
