@@ -16,10 +16,10 @@ for stock in stocks:
     print(stock, '...')
     
     try:
-        info = tickers[stock].stats()
-        stats[stock]['Beta']    = info['defaultKeyStatistics']['beta']
-        stats[stock]['P/E']     = info['summaryDetail']['trailingPE']
-        stats[stock]['Fwd P/E'] = info['summaryDetail']['forwardPE']
+        info = tickers[stock].info
+        stats[stock]['Beta']    = info['beta']
+        stats[stock]['P/E']     = info['trailingPE']
+        stats[stock]['Fwd P/E'] = info['forwardPE']
     except KeyError as e:
         pass
 
