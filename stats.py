@@ -17,9 +17,9 @@ for stock in stocks:
     
     try:
         info = tickers[stock].info
-        stats[stock]['Beta']    = info['beta']
         stats[stock]['P/E']     = info['trailingPE']
-        stats[stock]['Fwd P/E'] = info['forwardPE']
+        stats[stock]['Beta']    = info['beta']        
+        #stats[stock]['Fwd P/E'] = info['forwardPE']
     except KeyError as e:
         pass
 
