@@ -22,6 +22,8 @@ for stock in stocks:
         #stats[stock]['Fwd P/E'] = info['forwardPE']
     except KeyError as e:
         pass
+    except TypeError as e:
+        pass
 
 df = pd.DataFrame(data=stats)[::-1].T
 
