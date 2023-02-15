@@ -2,6 +2,7 @@
 ^GSPC
 ^IXIC
 ^RUT
+QQQ
 QLD
 TQQQ
 UPRO
