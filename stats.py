@@ -1,25 +1,17 @@
-from functools import total_ordering
-import yfinance as yf
-import pandas as pd
-import subprocess
-import ta
-from datetime import datetime, timezone, timedelta
+from yahooquery import Ticker
 import os
-import sys
+import pandas as pd
 
-stocks = [t.strip() for t in open('ticker.txt','r').readlines()]
-tickers = yf.Tickers(stocks).tickers
+tickers = [t.strip() for t in open('ticker.txt','r').readlines()]
+key_stats = Ticker(tickers).key_stats
 stats = {}
 
-for stock in stocks:
-    stats[stock] = {}
-    print(stock, '...')
+for ticker in key_stats:
+    stats[ticker] = {}
+    print(ticker, '...')
     
     try:
-        info = tickers[stock].info
-        stats[stock]['P/E']     = info['trailingPE']
-        stats[stock]['Beta']    = info['beta']        
-        #stats[stock]['Fwd P/E'] = info['forwardPE']
+        stats[ticker]['beta'] = key_stats[ticker]['beta']
     except KeyError as e:
         pass
     except TypeError as e:
