@@ -7,7 +7,7 @@ import os
 period = '10y'
 
 # 종목
-stocks = ['BTC-KRW','ETH-KRW','BTC-USD','ETH-USD']
+stocks = ['BTC-KRW','ETH-KRW']
 data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
 df = data['Close']
 
