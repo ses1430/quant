@@ -5,8 +5,11 @@ import pandas as pd
 tickers = 'AAPL MSFT GOOGL TSLA IBM NVDA AMD AVGO ASML TSM COST KO PEP PG MCD SBUX NKE DIS ATVI JNJ MMM WM LMT RMS.PA MC.PA CDI.PA P911.DE'
 df = Ticker(tickers).grading_history
 
-df2 = df.loc[(df['epochGradeDate'] >= '2023-03-01') & (df['action'] != 'main') & (df['action'] != 'reit')][['epochGradeDate','firm','action','fromGrade','toGrade']]
-print(df2.droplevel(axis=0,level=1).sort_values('epochGradeDate'))
+# df2 = df.loc[(df['epochGradeDate'] >= '2023-03-01') & (df['action'] != 'main') & (df['action'] != 'reit')][['epochGradeDate','firm','action','fromGrade','toGrade']]
+df2 = df.loc[(df['epochGradeDate'] >= '2023-03-01')][['epochGradeDate','firm','action','fromGrade','toGrade']]
+
+# print(df2.droplevel(axis=0,level=1).sort_values('epochGradeDate'))
+print(df2)
 
 '''
 writer = pd.ExcelWriter('grade.xlsx', engine='xlsxwriter')
