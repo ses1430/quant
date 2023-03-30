@@ -1,20 +1,25 @@
 from yahooquery import Ticker
 import os
 import pandas as pd
+import argparse
+from datetime import datetime, timezone
+import pytz
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--date', help='the epochGradeDate value to filter on')
+args = parser.parse_args()
+
+if args.date:
+    filter_date = args.date
+else:
+    # Set filter_date to today's date in New York timezone
+    ny_tz = pytz.timezone('America/New_York')
+    filter_date = datetime.now(ny_tz).strftime('%Y-%m-%d')
+
+print("filter_date : ", filter_date)
 tickers = 'AAPL MSFT GOOGL TSLA IBM NVDA AMD AVGO ASML TSM COST KO PEP PG MCD SBUX NKE DIS ATVI JNJ MMM WM LMT RMS.PA MC.PA CDI.PA P911.DE'
 df = Ticker(tickers).grading_history
 
-# df2 = df.loc[(df['epochGradeDate'] >= '2023-03-01') & (df['action'] != 'main') & (df['action'] != 'reit')][['epochGradeDate','firm','action','fromGrade','toGrade']]
-df2 = df.loc[(df['epochGradeDate'] >= '2023-03-01')][['epochGradeDate','firm','action','fromGrade','toGrade']]
+df2 = df.loc[(df['epochGradeDate'] >= filter_date)][['epochGradeDate','firm','action','fromGrade','toGrade']]
 
-# print(df2.droplevel(axis=0,level=1).sort_values('epochGradeDate'))
 print(df2)
-
-'''
-writer = pd.ExcelWriter('grade.xlsx', engine='xlsxwriter')
-df2.to_excel(writer, sheet_name='Sheet1')
-writer.close()
-
-os.startfile("grade.xlsx")
-'''
