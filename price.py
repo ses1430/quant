@@ -28,6 +28,8 @@ for ticker in stocks:
     stat[ticker] = {}
     t = data['Close'][ticker]
 
+    # print(ticker, t[-1])
+
     sma120 = ta.trend.sma_indicator(t, window=120, fillna=True)[-1]
     sma200 = ta.trend.sma_indicator(t, window=200, fillna=True)[-1]
 
@@ -37,7 +39,8 @@ for ticker in stocks:
     stat[ticker]['SMA200'] = t[-1] / sma200
 
     stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
-    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100    
+    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
+    stat[ticker]['BB.W'] = ta.volatility.bollinger_wband(t, window, window_dev, True)[-1]
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
