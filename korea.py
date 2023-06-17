@@ -5,7 +5,7 @@ import datetime as dt
 import ta
 import os
 
-stocks = {item.split(',')[0]:item.split(',')[1].strip() for item in open('kor_ticker.dat', 'r', encoding='utf-8').readlines()}
+stocks = {item.split('\t')[0]:item.split('\t')[1].strip() for item in open('kor_ticker.dat', 'r', encoding='utf-8').readlines()}
 
 start_dt = (dt.datetime.now() - dt.timedelta(days=365*10+10)).strftime('%Y-%m-%d')
 end_dt = dt.datetime.now().strftime('%Y-%m-%d')
