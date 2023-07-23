@@ -30,15 +30,11 @@ for ticker in stocks:
     t_week = t.resample('W-FRI').last()
     t_month = t.resample('M').last()
 
-    # print(ticker, t[-1])
+    sma20 = ta.trend.sma_indicator(t, window=20, fillna=True)[-1]
+    sma100 = ta.trend.sma_indicator(t, window=100, fillna=True)[-1]
 
-    sma120 = ta.trend.sma_indicator(t, window=120, fillna=True)[-1]
-    sma200 = ta.trend.sma_indicator(t, window=200, fillna=True)[-1]
-
-    # stat[ticker]['SMA120'] = sma120
-    # stat[ticker]['SMA200'] = sma200
-    stat[ticker]['SMA120'] = t[-1] / sma120
-    stat[ticker]['SMA200'] = t[-1] / sma200
+    stat[ticker]['SMA20'] = t[-1] / sma20
+    stat[ticker]['SMA100'] = t[-1] / sma100
 
     stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
     stat[ticker]['RSI.W'] = ta.momentum.rsi(t_week)[-1]
