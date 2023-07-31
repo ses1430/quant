@@ -18,4 +18,4 @@ for cur in currencies:
     tree = elemTree.fromstring(requests.get(url).text.strip())
     results.append(tree.find('set').get('value'))
 
-print(','.join(results))
+print(' '.join(results))

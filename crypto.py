@@ -7,9 +7,10 @@ import os
 period = '10y'
 
 # 종목
-stocks = ['BTC-KRW','ETH-KRW']
+stocks = 'BTC,ETH,XRP,ATOM,BCH,LINK,ETC,BTG,DOGE,AAVE,ADA,AVAX,DOT,BSV,SOL,NEO,EGLD,AXS'
+stocks = [item + '-KRW' for item in stocks.split(',')]
 data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
-df = data['Close']
+df = data['Close'][stocks]
 
 # rsi, bollinger band 계산
 stat = {}

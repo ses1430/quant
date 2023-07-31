@@ -1,20 +1,22 @@
-from yahooquery import Ticker
+import yfinance as yf
 import os
 import pandas as pd
 
-tickers = [t.strip() for t in open('ticker.txt','r').readlines()]
-key_stats = Ticker(tickers).key_stats
 stats = {}
+tickers = [t.strip() for t in open('ticker.txt','r').readlines()]
+obj = yf.Tickers(tickers).tickers
 
-for ticker in key_stats:
+for ticker in tickers:
     stats[ticker] = {}
-    print(ticker, '...')
-    
+
     try:
-        stats[ticker]['beta'] = key_stats[ticker]['beta']
+        stats[ticker]['beta'] = obj[ticker].info['beta']
+        print(ticker, stats[ticker]['beta'])
     except KeyError as e:
+        print(ticker, 'key error...')
         pass
     except TypeError as e:
+        print(ticker, 'type error...')
         pass
 
 df = pd.DataFrame(data=stats)[::-1].T
