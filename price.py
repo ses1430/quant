@@ -33,14 +33,14 @@ for ticker in stocks:
     sma20 = ta.trend.sma_indicator(t, window=20, fillna=True)[-1]
     sma100 = ta.trend.sma_indicator(t, window=100, fillna=True)[-1]
 
-    stat[ticker]['SMA20'] = t[-1] / sma20
-    stat[ticker]['SMA100'] = t[-1] / sma100
+    stat[ticker]['sma20'] = t[-1] / sma20
+    stat[ticker]['sma100'] = t[-1] / sma100
 
-    stat[ticker]['RSI'] = ta.momentum.rsi(t)[-1]
-    stat[ticker]['RSI.W'] = ta.momentum.rsi(t_week)[-1]
-    stat[ticker]['RSI.M'] = ta.momentum.rsi(t_month)[-1]
-    stat[ticker]['BB.P'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
-    stat[ticker]['BB.W'] = ta.volatility.bollinger_wband(t, window, window_dev, True)[-1]
+    stat[ticker]['rsi'] = ta.momentum.rsi(t)[-1]
+    stat[ticker]['rsi.w'] = ta.momentum.rsi(t_week)[-1]
+    stat[ticker]['rsi.m'] = ta.momentum.rsi(t_month)[-1]
+    stat[ticker]['bb'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
+    stat[ticker]['bb.w'] = ta.volatility.bollinger_pband(t_week, window, window_dev, True)[-1] * 100
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T

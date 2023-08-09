@@ -2,8 +2,8 @@ import requests
 import json
 
 # 전고점
-hist_top_btc =  81138408
-hist_top_eth =  5778651
+hist_top_btc = 81138408
+hist_top_eth = 5778651
 
 # eth (순서대로 : 스테이킹 -> 잔고 -> 보상)
 eth_0 = 2.62
