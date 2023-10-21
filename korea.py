@@ -9,7 +9,7 @@ stocks = {item.split('\t')[0]:item.split('\t')[1].strip() for item in open('kor_
 
 start_dt = (dt.datetime.now() - dt.timedelta(days=365*10+10)).strftime('%Y-%m-%d')
 end_dt = dt.datetime.now().strftime('%Y-%m-%d')
-
+ 
 df_list = [fdr.DataReader(t, start_dt, end_dt)['Close'] for t in stocks]
 data = pd.concat(df_list, axis=1)
 data.columns = list(stocks.values())
@@ -32,11 +32,12 @@ for ticker in data.columns:
     ticker_data_week = ticker_data.resample('W-FRI').last()
     ticker_data_month = ticker_data.resample('M').last()
 
-    stat[ticker]['rsi'] = ta.momentum.rsi(ticker_data)[-1]
-    stat[ticker]['rsi.w'] = ta.momentum.rsi(ticker_data_week)[-1]
-    stat[ticker]['rsi.m'] = ta.momentum.rsi(ticker_data_month)[-1]
-    stat[ticker]['bb.p'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1] * 100
-    stat[ticker]['bb.w'] = ta.volatility.bollinger_pband(ticker_data_week, window, window_dev, True)[-1] * 100
+    stat[ticker]['rsi.일'] = ta.momentum.rsi(ticker_data)[-1]
+    stat[ticker]['rsi.주'] = ta.momentum.rsi(ticker_data_week)[-1]
+    stat[ticker]['rsi.월'] = ta.momentum.rsi(ticker_data_month)[-1]
+    stat[ticker]['bb.일'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1] * 100
+    stat[ticker]['bb.주'] = ta.volatility.bollinger_pband(ticker_data_week, window, window_dev, True)[-1] * 100
+    stat[ticker]['bb.월'] = ta.volatility.bollinger_pband(ticker_data_month, window, window_dev, True)[-1] * 100
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
