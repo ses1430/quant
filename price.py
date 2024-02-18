@@ -28,19 +28,27 @@ for ticker in stocks:
 
     t_week = t.resample('W-FRI').last()
     t_month = t.resample('M').last()
+    change_rate_mean = t.pct_change().abs().mean()
 
-    sma20 = ta.trend.sma_indicator(t, window=20, fillna=True)[-1]
-    sma100 = ta.trend.sma_indicator(t, window=100, fillna=True)[-1]
+    # sma20 = ta.trend.sma_indicator(t, window=20, fillna=True)[-1]
+    # sma100 = ta.trend.sma_indicator(t, window=100, fillna=True)[-1]
 
-    stat[ticker]['sma20'] = t[-1] / sma20
-    stat[ticker]['sma100'] = t[-1] / sma100
+    # stat[ticker]['sma20'] = t[-1] / sma20
+    # stat[ticker]['sma100'] = t[-1] / sma100
 
+    # stat[ticker]['변동율'] = change_rate_mean *100
     stat[ticker]['rsi.일'] = ta.momentum.rsi(t)[-1]
     stat[ticker]['rsi.주'] = ta.momentum.rsi(t_week)[-1]
     stat[ticker]['rsi.월'] = ta.momentum.rsi(t_month)[-1]
     stat[ticker]['bb.일'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
     stat[ticker]['bb.주'] = ta.volatility.bollinger_pband(t_week, window, window_dev, True)[-1] * 100
     stat[ticker]['bb.월'] = ta.volatility.bollinger_pband(t_month, window, window_dev, True)[-1] * 100
+
+'''
+basis_change_rate = stat['^GSPC']['변동율']
+for ticker in stocks:
+    stat[ticker]['변동비'] = stat[ticker]['변동율'] / basis_change_rate
+'''
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T

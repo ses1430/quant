@@ -7,10 +7,10 @@ hist_top_eth = 5778651
 
 # eth (순서대로 : 스테이킹 -> 잔고 -> 보상)
 eth_0 = 2.62
-eth_1 = 0.86569869
-eth_2 = 0.12818316
+eth_1 = 0.89482887
+eth_2 = 0.14638980
 
-btc_amt = 0.18961276
+btc_amt = 0.19484416
 eth_amt = eth_0 + eth_1 + eth_2
 
 def get_ticker_price(ticker):
