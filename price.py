@@ -27,15 +27,15 @@ window, window_dev = 14, 2
     
 for ticker in stocks:
     stat[ticker] = {}
-    t = data['Close'][ticker]
+    t_day = data['Close'][ticker]
 
-    t_week = t.resample('W-FRI').last()
-    t_month = t.resample('M').last()
+    t_week = t_day.resample('W-FRI').last()
+    t_month = t_day.resample('M').last()
 
-    stat[ticker]['rsi.일'] = ta.momentum.rsi(t)[-1]
+    stat[ticker]['rsi.일'] = ta.momentum.rsi(t_day)[-1]
     stat[ticker]['rsi.주'] = ta.momentum.rsi(t_week)[-1]
     stat[ticker]['rsi.월'] = ta.momentum.rsi(t_month)[-1]
-    stat[ticker]['bb.일'] = ta.volatility.bollinger_pband(t, window, window_dev, True)[-1] * 100
+    stat[ticker]['bb.일'] = ta.volatility.bollinger_pband(t_day, window, window_dev, True)[-1] * 100
     stat[ticker]['bb.주'] = ta.volatility.bollinger_pband(t_week, window, window_dev, True)[-1] * 100
     stat[ticker]['bb.월'] = ta.volatility.bollinger_pband(t_month, window, window_dev, True)[-1] * 100
 
