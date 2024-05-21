@@ -2,17 +2,13 @@ import requests
 import json
 
 # 전고점
-hist_top_btc = 81138408
+hist_top_btc = 97041816
 hist_top_eth = 5778651
 
-# eth (순서대로 : 스테이킹 -> 잔고 -> 보상)
-eth_0 = 2.62
-eth_1 = 0.94474741
-eth_2 = 0.15517328
-
-# btc
-btc_amt = 0.19622653
-eth_amt = eth_0 + eth_1 + eth_2
+# 잔고
+btc_amt = 0.20149451
+eth_amt = 3.82242547 + 0.17447216 + 0.04020140
+# 이더 = 스테이킹 + 보상 + 잔고
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
