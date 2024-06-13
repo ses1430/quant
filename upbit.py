@@ -2,12 +2,12 @@ import requests
 import json
 
 # 전고점
-hist_top_btc = 97041816
+hist_top_btc = 97364032
 hist_top_eth = 5778651
 
 # 잔고
 btc_amt = 0.20149451
-eth_amt = 3.82242547 + 0.17447216 + 0.04020140
+eth_amt = 3.81873090 + 0.18066198 + 0.04020140
 # 이더 = 스테이킹 + 보상 + 잔고
 
 def get_ticker_price(ticker):

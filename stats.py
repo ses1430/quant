@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 stats = {}
-tickers = [t.strip() for t in open('ticker.txt','r').readlines()]
+tickers = [t.strip() for t in open('ticker.txt','r').readlines() if not t.startswith('#')]
 prices = yf.download(tickers, interval='1d', period='5y', rounding=True, ignore_tz=True)
 obj = yf.Tickers(tickers).tickers
 
@@ -13,10 +13,15 @@ for ticker in tickers:
     change_rate_mean = t.pct_change().abs().mean()
 
     try:
-        stats[ticker]['forwardPE'] = obj[ticker].info.get('forwardPE', 'n/a')
-        stats[ticker]['trailingPE'] = obj[ticker].info.get('trailingPE', 'n/a')
+        info = obj[ticker].info
+        stats[ticker]['forwardPE'] = info.get('forwardPE', 'n/a')
+        stats[ticker]['trailingPE'] = info.get('trailingPE', 'n/a')
         stats[ticker]['beta"'] = change_rate_mean * 100
-        stats[ticker]['beta'] = obj[ticker].info.get('beta', 'n/a')
+        stats[ticker]['beta'] = info.get('beta', 'n/a')
+        stats[ticker]['marketCap'] = info.get('marketCap', 'n/a')  # Add market capitalization
+
+        if stats[ticker]['marketCap'] != 'n/a':
+            stats[ticker]['marketCap'] = round(stats[ticker]['marketCap'] / 1000000000, 1)
 
         print(ticker, stats[ticker]['beta'], stats[ticker]['trailingPE'])
     except KeyError as e:
