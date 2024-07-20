@@ -4,10 +4,10 @@ from datetime import datetime, timezone, timedelta
 import ta
 import os
 
-period = '10y'
+period = '5y'
 
 # 종목
-stocks = 'BTC,ETH,USDT,SOL,XRP,DOGE,ADA,SHIB,AVAX,TRX'
+stocks = 'BTC,ETH,SOL,XRP,DOGE,ADA'
 stocks = [item + '-KRW' for item in stocks.split(',')]
 data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
 df = data['Close'][stocks]

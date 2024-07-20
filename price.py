@@ -10,11 +10,11 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # target tickers
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks if not t.startswith('#')]
-data = yf.download(stocks, interval='1d', period='max', rounding=True, ignore_tz=True, prepost=True)
+data = yf.download(stocks, interval='1d', period='max', rounding=True, ignore_tz=True)
 df = data['Close']
 
 # Filter data for the last 20 years
-start_date = df.index[-1] - timedelta(days=20*365)
+start_date = df.index[-1] - timedelta(days=10*365+5)
 df = df[df.index >= start_date]
 
 # make data with 365days

@@ -1,44 +1,82 @@
 import yfinance as yf
 import os
 import pandas as pd
+from datetime import datetime, timedelta
+from collections import OrderedDict
 
-stats = {}
-tickers = [t.strip() for t in open('ticker.txt','r').readlines() if not t.startswith('#')]
-prices = yf.download(tickers, interval='1d', period='5y', rounding=True, ignore_tz=True)
-obj = yf.Tickers(tickers).tickers
+def read_tickers(filename):
+    with open(filename, 'r') as file:
+        return [t.strip() for t in file if not t.startswith('#')]
 
-for ticker in tickers:
-    stats[ticker] = {}
-    t = prices['Close'][ticker]
-    change_rate_mean = t.pct_change().abs().mean()
+def get_stock_data(tickers):
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=5*365)  # 5 years ago
+    return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
 
-    try:
+def calculate_stats(prices, obj, tickers):
+    stats = OrderedDict()
+    basis_change_rate = None
+    for ticker in tickers:
+        stats[ticker] = {
+            'forwardPE': 'n/a',
+            'trailingPE': 'n/a',
+            'beta"': 'n/a',
+            'beta': 'n/a',
+            'marketCap': 'n/a'
+        }
+        
+        if ticker not in prices['Close'].columns:
+            print(f"Warning: No data found for {ticker}")
+            continue
+        
+        t = prices['Close'][ticker]
+        change_rate_mean = t.pct_change().abs().mean()
+        
         info = obj[ticker].info
-        stats[ticker]['forwardPE'] = info.get('forwardPE', 'n/a')
-        stats[ticker]['trailingPE'] = info.get('trailingPE', 'n/a')
-        stats[ticker]['beta"'] = change_rate_mean * 100
-        stats[ticker]['beta'] = info.get('beta', 'n/a')
-        stats[ticker]['marketCap'] = info.get('marketCap', 'n/a')  # Add market capitalization
+        stats[ticker].update({
+            'marketCap': round(info.get('marketCap', 0) / 1e9, 1) if info.get('marketCap') not in ['n/a', None] else 'n/a',
+            'beta': info.get('beta', 'n/a'),
+            'beta"': change_rate_mean * 100,
+            'trailingPE': info.get('trailingPE', 'n/a'),
+            'forwardPE': info.get('forwardPE', 'n/a')
+        })
+        
+        if ticker == '^GSPC':
+            basis_change_rate = change_rate_mean * 100
+        
+        print(f"{ticker}: beta = {stats[ticker]['beta']}, trailingPE = {stats[ticker]['trailingPE']}")
+    
+    return stats, basis_change_rate
 
-        if stats[ticker]['marketCap'] != 'n/a':
-            stats[ticker]['marketCap'] = round(stats[ticker]['marketCap'] / 1000000000, 1)
+def normalize_beta(stats, basis_change_rate):
+    if basis_change_rate is None or basis_change_rate == 0:
+        print("Warning: Unable to normalize beta due to invalid basis_change_rate")
+        return stats
 
-        print(ticker, stats[ticker]['beta'], stats[ticker]['trailingPE'])
-    except KeyError as e:
-        print(ticker, 'key error...')
-        pass
-    except TypeError as e:
-        print(ticker, 'type error...')
-        pass
+    for ticker in stats:
+        if isinstance(stats[ticker]['beta"'], (int, float)):
+            stats[ticker]['beta"'] /= basis_change_rate
+        else:
+            stats[ticker]['beta"'] = 'n/a'
+    return stats
 
-basis_change_rate = stats['^GSPC']['beta"']
-for ticker in tickers:
-    stats[ticker]['beta"'] = stats[ticker]['beta"'] / basis_change_rate
+def save_to_excel(stats):
+    df = pd.DataFrame.from_dict(stats, orient='index')
+    with pd.ExcelWriter('stats.xlsx', engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Sheet1')
+    os.startfile("stats.xlsx")
 
-df = pd.DataFrame(data=stats)[::-1].T
+def main():
+    tickers = read_tickers('ticker.txt')
+    prices = get_stock_data(tickers)
+    obj = yf.Tickers(tickers).tickers
+    
+    try:
+        stats, basis_change_rate = calculate_stats(prices, obj, tickers)
+        stats = normalize_beta(stats, basis_change_rate)
+        save_to_excel(stats)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-writer = pd.ExcelWriter('stats.xlsx', engine='xlsxwriter')
-df.to_excel(writer, sheet_name='Sheet1')
-writer.close()
-
-os.startfile("stats.xlsx")
+if __name__ == "__main__":
+    main()

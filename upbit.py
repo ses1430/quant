@@ -6,8 +6,8 @@ hist_top_btc = 97364032
 hist_top_eth = 5778651
 
 # 잔고
-btc_amt = 0.20149451
-eth_amt = 3.81873090 + 0.18066198 + 0.04020140
+btc_amt = 0.20883341
+eth_amt = 3.81873090 + 0.19366897 + 0.11173298
 # 이더 = 스테이킹 + 보상 + 잔고
 
 def get_ticker_price(ticker):
@@ -24,6 +24,9 @@ krw_eth = get_ticker_price('krw-eth')
 btc_cur_price = krw_btc['trade_price']
 eth_cur_price = krw_eth['trade_price']
 
+print('-----------------------------------')
+print('BTC 현재가 :', btc_cur_price)
+print('ETH 현재가 :', eth_cur_price)
 print('-----------------------------------')
 print('BTC 전고점대비 : {}%'.format(round((btc_cur_price-hist_top_btc)/hist_top_btc*100, 2)))
 print('ETH 전고점대비 : {}%'.format(round((eth_cur_price-hist_top_eth)/hist_top_eth*100, 2)))
