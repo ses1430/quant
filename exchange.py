@@ -16,6 +16,10 @@ print('op_date :', op_date)
 for cur in currencies:
     url = 'http://www.smbs.biz/ExRate/StdExRate_xml.jsp?arr_value={}_{}_{}'.format(cur, op_date, op_date)
     tree = elemTree.fromstring(requests.get(url).text.strip())
-    results.append(tree.find('set').get('value'))
+
+    try:
+        results.append(tree.find('set').get('value'))
+    except AttributeError:
+        results.append('n/a')
 
 print(' '.join(results))

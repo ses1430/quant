@@ -6,9 +6,8 @@ hist_top_btc = 97364032
 hist_top_eth = 5778651
 
 # 잔고
-btc_amt = 0.20883341
-eth_amt = 3.81873090 + 0.19366897 + 0.11173298
-# 이더 = 스테이킹 + 보상 + 잔고
+btc_amt = 0.21989125
+eth_amt = 3.85112926
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker

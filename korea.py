@@ -32,6 +32,7 @@ for ticker in data.columns:
     ticker_data_week = ticker_data.resample('W-FRI').last()
     ticker_data_month = ticker_data.resample('M').last()
 
+    stat[ticker]['b"'] = ticker_data[-240:].pct_change().abs().mean() * 100
     stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data)[-1]
     stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week)[-1]
     stat[ticker]['RSI.월'] = ta.momentum.rsi(ticker_data_month)[-1]

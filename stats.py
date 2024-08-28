@@ -17,13 +17,14 @@ def calculate_stats(prices, obj, tickers):
     stats = OrderedDict()
     basis_change_rate = None
     for ticker in tickers:
-        stats[ticker] = {
-            'forwardPE': 'n/a',
-            'trailingPE': 'n/a',
+        stats[ticker] = OrderedDict({
+            'marketCap': 'n/a',
             'beta"': 'n/a',
             'beta': 'n/a',
-            'marketCap': 'n/a'
-        }
+            'trailingPE': 'n/a',
+            'forwardPE': 'n/a',
+            'recentVolume': 'n/a'
+        })
         
         if ticker not in prices['Close'].columns:
             print(f"Warning: No data found for {ticker}")
@@ -38,13 +39,14 @@ def calculate_stats(prices, obj, tickers):
             'beta': info.get('beta', 'n/a'),
             'beta"': change_rate_mean * 100,
             'trailingPE': info.get('trailingPE', 'n/a'),
-            'forwardPE': info.get('forwardPE', 'n/a')
+            'forwardPE': info.get('forwardPE', 'n/a'),
+            'recentVolume': prices['Volume'][ticker].iloc[-1] if ticker in prices['Volume'].columns else 'n/a'
         })
         
         if ticker == '^GSPC':
             basis_change_rate = change_rate_mean * 100
         
-        print(f"{ticker}: beta = {stats[ticker]['beta']}, trailingPE = {stats[ticker]['trailingPE']}")
+        print(f"{ticker}: beta = {stats[ticker]['beta']}, trailingPE = {stats[ticker]['trailingPE']}, recentVolume = {stats[ticker]['recentVolume']}")
     
     return stats, basis_change_rate
 
@@ -62,6 +64,7 @@ def normalize_beta(stats, basis_change_rate):
 
 def save_to_excel(stats):
     df = pd.DataFrame.from_dict(stats, orient='index')
+    df = df[df.columns[::-1]]  # Reverse the column order
     with pd.ExcelWriter('stats.xlsx', engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Sheet1')
     os.startfile("stats.xlsx")
