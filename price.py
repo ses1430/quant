@@ -17,6 +17,9 @@ df = data['Close']
 start_date = df.index[-1] - timedelta(days=10*365+5)
 df = df[df.index >= start_date]
 
+# Convert datetime index to timezone-naive
+df.index = df.index.tz_localize(None)
+
 # make data with 365days
 days = [df.index[0] + timedelta(days=i) for i in range((df.index[-1] - df.index[0]).days + 1)]
 df_days = pd.DataFrame(days)
@@ -32,6 +35,9 @@ window, window_dev = 14, 2
 for ticker in stocks:
     stat[ticker] = {}
     t_day = data['Close'][ticker]
+
+    # Convert datetime index to timezone-naive
+    t_day.index = t_day.index.tz_localize(None)
 
     t_week = t_day.resample('W-FRI').last()
     t_month = t_day.resample('M').last()

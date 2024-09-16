@@ -18,12 +18,11 @@ def calculate_stats(prices, obj, tickers):
     basis_change_rate = None
     for ticker in tickers:
         stats[ticker] = OrderedDict({
-            'marketCap': 'n/a',
-            'beta"': 'n/a',
-            'beta': 'n/a',
-            'trailingPE': 'n/a',
-            'forwardPE': 'n/a',
-            'recentVolume': 'n/a'
+            'forwardPE': '',
+            'trailingPE': '',            
+            'beta"': '',
+            'beta': '',
+            'marketCap': '',
         })
         
         if ticker not in prices['Close'].columns:
@@ -35,18 +34,17 @@ def calculate_stats(prices, obj, tickers):
         
         info = obj[ticker].info
         stats[ticker].update({
-            'marketCap': round(info.get('marketCap', 0) / 1e9, 1) if info.get('marketCap') not in ['n/a', None] else 'n/a',
-            'beta': info.get('beta', 'n/a'),
+            'marketCap': round(info.get('marketCap', 0) / 1e9, 1) if info.get('marketCap') not in ['', None] else '',
+            'beta': info.get('beta', ''),
             'beta"': change_rate_mean * 100,
-            'trailingPE': info.get('trailingPE', 'n/a'),
-            'forwardPE': info.get('forwardPE', 'n/a'),
-            'recentVolume': prices['Volume'][ticker].iloc[-1] if ticker in prices['Volume'].columns else 'n/a'
+            'trailingPE': info.get('trailingPE', ''),
+            'forwardPE': info.get('forwardPE', ''),
         })
         
         if ticker == '^GSPC':
             basis_change_rate = change_rate_mean * 100
         
-        print(f"{ticker}: beta = {stats[ticker]['beta']}, trailingPE = {stats[ticker]['trailingPE']}, recentVolume = {stats[ticker]['recentVolume']}")
+        print(f"{ticker}: beta = {stats[ticker]['beta']}, trailingPE = {stats[ticker]['trailingPE']}")
     
     return stats, basis_change_rate
 
@@ -59,7 +57,7 @@ def normalize_beta(stats, basis_change_rate):
         if isinstance(stats[ticker]['beta"'], (int, float)):
             stats[ticker]['beta"'] /= basis_change_rate
         else:
-            stats[ticker]['beta"'] = 'n/a'
+            stats[ticker]['beta"'] = ''
     return stats
 
 def save_to_excel(stats):
@@ -83,3 +81,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
