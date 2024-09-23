@@ -6,7 +6,7 @@ hist_top_btc = 97364032
 hist_top_eth = 5778651
 
 # 잔고
-btc_amt = 0.38324480
+btc_amt = 0.38912635
 eth_amt = 0
 
 def get_ticker_price(ticker):

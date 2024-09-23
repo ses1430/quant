@@ -26,13 +26,19 @@ df = df.fillna(method='ffill')[list(stocks.values())]
 stat = {}
 window, window_dev = 14, 2
 
+def calculate_annual_volatility(prices):
+    daily_returns = prices.pct_change().dropna()
+    annual_volatility = daily_returns.std() * np.sqrt(252)  # 252는 연간 거래일 수
+    return annual_volatility * 5
+
 for ticker in data.columns:
     stat[ticker] = {}
     ticker_data = data[ticker]
     ticker_data_week = ticker_data.resample('W-FRI').last()
     ticker_data_month = ticker_data.resample('M').last()
 
-    stat[ticker]['b"'] = ticker_data[-240:].pct_change().abs().mean() * 100
+    # stat[ticker]['b"'] = ticker_data[-240:].pct_change().abs().mean() * 100
+    stat[ticker]['b"'] = calculate_annual_volatility(ticker_data[-252:])
     stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data)[-1]
     stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week)[-1]
     stat[ticker]['RSI.월'] = ta.momentum.rsi(ticker_data_month)[-1]

@@ -12,6 +12,8 @@ stocks = [item + '-KRW' for item in stocks.split(',')]
 data = yf.download(stocks, period=period, rounding=True, ignore_tz=True)
 df = data['Close'][stocks]
 
+df.index = df.index.tz_localize(None)
+
 # rsi, bollinger band 계산
 stat = {}
 window, window_dev = 14, 2
