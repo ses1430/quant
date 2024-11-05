@@ -8,14 +8,14 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # target tickers
-stocks = open('ticker.txt','r').readlines()
+stocks = open('all_tickers.csv','r').readlines()
 stocks = [t.strip() for t in stocks if not t.startswith('#')]
-
-end_date = datetime.now()
-start_date = end_date - timedelta(days=10*365+10)  # 5 years ago
-
-data = yf.download(stocks, start=start_date, end=end_date, rounding=True, ignore_tz=True)
+data = yf.download(stocks, interval='1d', period='max', rounding=True, ignore_tz=True)
 df = data['Close']
+
+# Filter data for the last 20 years
+start_date = df.index[-1] - timedelta(days=10*365+5)
+df = df[df.index >= start_date]
 
 # Convert datetime index to timezone-naive
 df.index = df.index.tz_localize(None)
@@ -53,8 +53,8 @@ df_stat = pd.DataFrame(data=stat, dtype='float64')[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
 
 # export to excel file
-writer = pd.ExcelWriter('price.xlsx', engine='xlsxwriter')
+writer = pd.ExcelWriter('all.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='Sheet1')
 writer.close()
 
-os.startfile("price.xlsx")
+os.startfile("all.xlsx")

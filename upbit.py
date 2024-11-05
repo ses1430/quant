@@ -5,7 +5,7 @@ import json
 hist_top_btc = 97364032
 
 # 잔고
-btc_amt = 0.38912635
+btc_amt = 0.39443083
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
@@ -21,11 +21,8 @@ btc_cur_price = krw_btc['trade_price']
 
 print('-----------------------------------')
 print('BTC 현재가 :', btc_cur_price)
-print('-----------------------------------')
 print('BTC 전고점대비 : {}%'.format(round((btc_cur_price-hist_top_btc)/hist_top_btc*100, 2)))
-print('-----------------------------------')
 print('BTC 일일 변동 :', round(krw_btc['signed_change_rate'] * 100, 2), '%')
-print('-----------------------------------')
 print('BTC 잔고 :', round((krw_btc['trade_price'] * btc_amt)/10000), "만원 /", round(btc_amt, 3), 'BTC')
 print('-----------------------------------')
 print('TOTAL ACCOUNT :', round((krw_btc['trade_price'] * btc_amt)/10000, 1))

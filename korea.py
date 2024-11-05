@@ -39,9 +39,11 @@ for ticker in data.columns:
 
     # stat[ticker]['b"'] = ticker_data[-240:].pct_change().abs().mean() * 100
     stat[ticker]['b"'] = calculate_annual_volatility(ticker_data[-252:])
+    
     stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data)[-1]
     stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week)[-1]
     stat[ticker]['RSI.월'] = ta.momentum.rsi(ticker_data_month)[-1]
+    
     stat[ticker]['BB.일'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1] * 100
     stat[ticker]['BB.주'] = ta.volatility.bollinger_pband(ticker_data_week, window, window_dev, True)[-1] * 100
     stat[ticker]['BB.월'] = ta.volatility.bollinger_pband(ticker_data_month, window, window_dev, True)[-1] * 100

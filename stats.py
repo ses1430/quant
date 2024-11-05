@@ -69,6 +69,7 @@ def save_to_excel(stats):
 
 def main():
     tickers = read_tickers('ticker.txt')
+    #tickers = read_tickers('all_tickers.csv')
     prices = get_stock_data(tickers)
     obj = yf.Tickers(tickers).tickers
     
