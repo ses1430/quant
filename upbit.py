@@ -2,12 +2,12 @@ import requests
 import json
 
 # 전고점
-hist_top_btc =  126889000 
+hist_top_btc =  137700000 
 hist_top_doge = 619
 
 # 잔고
-btc_amt = 0.39443083
-doge_amt = 3331.010285
+btc_amt = 0.39815688
+doge_amt = 0
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
