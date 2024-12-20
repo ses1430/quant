@@ -2,11 +2,11 @@ import requests
 import json
 
 # 전고점
-hist_top_btc =  137700000 
+hist_top_btc =  150000000 
 hist_top_doge = 619
 
 # 잔고
-btc_amt = 0.39815688
+btc_amt = 0.40087402
 doge_amt = 0
 
 def get_ticker_price(ticker):
