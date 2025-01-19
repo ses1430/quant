@@ -10,7 +10,7 @@ def read_tickers(filename):
 
 def get_stock_data(tickers):
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=5*365)  # 5 years ago
+    start_date = end_date - timedelta(days=365)  # 5 years ago
     return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
 
 def calculate_stats(prices, obj, tickers):

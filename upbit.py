@@ -2,8 +2,8 @@ import requests
 import json
 
 # 전고점
-hist_top_btc =  150000000 
-hist_top_doge = 619
+hist_top_btc = 152558528
+hist_top_doge = 666
 
 # 잔고
 btc_amt = 0.40087402
