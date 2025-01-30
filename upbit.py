@@ -6,7 +6,7 @@ hist_top_btc = 152558528
 hist_top_doge = 666
 
 # 잔고
-btc_amt = 0.40087402
+btc_amt = 0.40349132
 doge_amt = 0
 
 def get_ticker_price(ticker):
