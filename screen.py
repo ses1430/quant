@@ -13,7 +13,7 @@ stocks = [t.strip() for t in stocks if not t.startswith('#')]
 data = yf.download(stocks, interval='1d', period='max', rounding=True, ignore_tz=True)
 df = data['Close']
 
-# Filter data for the last 20 years
+# Filter data for the last 10 years
 start_date = df.index[-1] - timedelta(days=10*365+5)
 df = df[df.index >= start_date]
 
