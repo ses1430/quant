@@ -98,7 +98,7 @@ for ticker in stocks:
 for ticker in stocks:
     stock_info = yf.Ticker(ticker).info
     additional_data.loc[ticker, 'P/E'] = stock_info.get('trailingPE', None)
-    additional_data.loc[ticker, 'div'] = stock_info.get('dividendYield', None) * 100 if stock_info.get('dividendYield') else None
+    additional_data.loc[ticker, 'div'] = stock_info.get('dividendYield', None) if stock_info.get('dividendYield') else None
     additional_data.loc[ticker, 'beta'] = stock_info.get('beta', None)
 
 # 기존 데이터프레임과 새로운 데이터 결합
