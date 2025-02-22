@@ -17,3 +17,10 @@ year.xlsx
 template.txt
 prepost.xlsx
 stock_stats.xlsx
+screening/~$all_tickers.xlsb
+.gitignore
+screening/~$indus_util.xlsb
+screening/~$healthcare.xlsb
+screening/healthcare.xlsb
+screening/indus_util.xlsb
+screening/screen.xlsx
