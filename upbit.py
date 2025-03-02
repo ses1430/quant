@@ -2,7 +2,7 @@ import requests
 import json
 
 hist_top_btc = 152558528
-btc_amt = 0.40696224
+btc_amt = 0.41900825
 
 def get_ticker_price(ticker):
     url = "https://api.upbit.com/v1/ticker?markets=" + ticker
