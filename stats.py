@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
+# 환율 캐싱을 위한 전역 딕셔너리
+exchange_rates = {}
+
 def read_tickers(filename):
     with open(filename, 'r') as file:
         return [t.strip() for t in file if not t.startswith('#')]
@@ -12,6 +15,24 @@ def get_stock_data(tickers):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365)  # 1년 전 데이터
     return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
+
+def get_exchange_rate(currency):
+    """해당 통화의 달러 환율을 가져오는 함수"""
+    if currency == 'USD':
+        return 1.0
+    
+    if currency in exchange_rates:
+        return exchange_rates[currency]  # 캐싱된 환율 반환
+
+    ticker = f"{currency}USD=X"  # 예: JPYUSD=X는 엔화-달러 환율
+    data = yf.download(ticker, period='1d')
+    if not data.empty:
+        exchange_rate = data['Close'][ticker].iloc[-1]
+        exchange_rates[currency] = exchange_rate  # 딕셔너리에 저장
+        
+        return exchange_rate
+    else:
+        raise ValueError(f"환율 데이터를 가져오지 못했습니다: {currency}")
 
 def calculate_stats(prices, obj, tickers):
     stats = OrderedDict()
@@ -49,8 +70,24 @@ def calculate_stats(prices, obj, tickers):
 
         # 주식 정보 업데이트
         info = obj[ticker].info
+        currency = info.get('currency', 'USD')  # 통화 확인
+        market_cap = info.get('marketCap', 0)   # 시가총액 가져오기
+
+        if market_cap and market_cap != '':
+            if currency != 'USD':
+                try:                    
+                    exchange_rate = get_exchange_rate(currency)  # 환율 가져오기
+                    market_cap_usd = market_cap * exchange_rate  # 달러로 변환
+                except Exception as e:
+                    print(f"{ticker} 시가총액 변환 오류: {e}")
+                    market_cap_usd = ''
+            else:
+                market_cap_usd = market_cap
+            stats[ticker]['marketCap'] = round(market_cap_usd / 1e9, 1)  # 억 달러 단위
+        else:
+            stats[ticker]['marketCap'] = ''
+
         stats[ticker].update({
-            'marketCap': round(info.get('marketCap', 0) / 1e9, 1) if info.get('marketCap') not in ['', None] else '',
             'beta': info.get('beta', ''),
             'beta"': beta_diff_mean,  # S&P500과의 일일 변동율 차이의 평균
             'trailingPE': info.get('trailingPE', ''),
