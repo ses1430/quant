@@ -7,13 +7,13 @@ from collections import OrderedDict
 # 환율 캐싱을 위한 전역 딕셔너리
 exchange_rates = {}
 
-def read_tickers(filename):
+def read_tickers(filename='ticker.txt'):
     with open(filename, 'r') as file:
         return [t.strip() for t in file if not t.startswith('#')]
 
 def get_stock_data(tickers):
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=365)  # 1년 전 데이터
+    start_date = end_date - timedelta(days=180)  # 최근 6개월
     return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
 
 def get_exchange_rate(currency):
@@ -104,7 +104,7 @@ def save_to_excel(stats):
     os.startfile("stats.xlsx")
 
 def main():
-    tickers = read_tickers('ticker.txt')  # 티커 파일 경로
+    tickers = read_tickers('stats.txt')  # 티커 파일 경로
     prices = get_stock_data(tickers)
     obj = yf.Tickers(tickers).tickers
     
