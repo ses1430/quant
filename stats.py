@@ -104,7 +104,7 @@ def save_to_excel(stats):
     os.startfile("stats.xlsx")
 
 def main():
-    tickers = read_tickers('stats.txt')  # 티커 파일 경로
+    tickers = read_tickers()  # 티커 파일 경로
     prices = get_stock_data(tickers)
     obj = yf.Tickers(tickers).tickers
     

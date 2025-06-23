@@ -97,6 +97,9 @@ for ticker in stocks:
 # Trailing P/E, Dividend Yield, Beta 가져오기
 for ticker in stocks:
     stock_info = yf.Ticker(ticker).info
+    additional_data.loc[ticker, 'Name'] = stock_info.get('shortName') or stock_info.get('longName', None)
+    additional_data.loc[ticker, 'marketCap'] = stock_info.get('marketCap', 0)
+    additional_data.loc[ticker, 'Industry'] = stock_info.get('industry', None)
     additional_data.loc[ticker, 'P/E'] = stock_info.get('trailingPE', None)
     additional_data.loc[ticker, 'div'] = stock_info.get('dividendYield', None) if stock_info.get('dividendYield') else None
     additional_data.loc[ticker, 'beta'] = stock_info.get('beta', None)

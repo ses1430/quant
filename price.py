@@ -44,15 +44,15 @@ for ticker in stocks:
     t_month = t_day.resample('M').last()
 
     # RSI 계산
-    stat[ticker]['RSI.일'] = ta.momentum.rsi(t_day)[-1]
-    stat[ticker]['RSI.주'] = ta.momentum.rsi(t_week)[-1]
-    stat[ticker]['RSI.월'] = ta.momentum.rsi(t_month)[-1]
+    stat[ticker]['RSI.D'] = ta.momentum.rsi(t_day)[-1]
+    stat[ticker]['RSI.W'] = ta.momentum.rsi(t_week)[-1]
+    stat[ticker]['RSI.M'] = ta.momentum.rsi(t_month)[-1]
     
     # 볼린저 밴드 계산
-    stat[ticker]['BB.일'] = ta.volatility.bollinger_pband(t_day, window, window_dev, True)[-1] * 100
-    stat[ticker]['BB.주'] = ta.volatility.bollinger_pband(t_week, window, window_dev, True)[-1] * 100
-    stat[ticker]['BB.월'] = ta.volatility.bollinger_pband(t_month, window, window_dev, True)[-1] * 100
-    
+    stat[ticker]['BB.D'] = ta.volatility.bollinger_pband(t_day, window, window_dev, True)[-1] * 100
+    stat[ticker]['BB.W'] = ta.volatility.bollinger_pband(t_week, window, window_dev, True)[-1] * 100
+    stat[ticker]['BB.M'] = ta.volatility.bollinger_pband(t_month, window, window_dev, True)[-1] * 100
+        
     # 이동평균선 계산 (ta.trend.sma_indicator 사용)
     current_price = t_day[-1]    
     sma60 = ta.trend.sma_indicator(t_day, window=60, fillna=True)[-1]
@@ -61,10 +61,12 @@ for ticker in stocks:
 
     # print(ticker, current_price, sma60, sma120, sma200)
     
-    # 각 이평선 대비 몇 % 위에 있는지 계산    
+    # 각 이평선 대비 몇 % 위에 있는지 계산
+    '''
     stat[ticker]['SMA60'] = round((current_price / sma60 - 1)*100, 1)
     stat[ticker]['SMA120'] = round((current_price / sma120 - 1)*100, 1)
     stat[ticker]['SMA200'] = round((current_price / sma200 - 1)*100, 1)
+    '''
 
 df_stat = pd.DataFrame(data=stat, dtype='float64')[::-1]
 df = pd.concat([df, df_stat]).iloc[::-1].T
