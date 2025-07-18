@@ -26,10 +26,12 @@ df = df.fillna(method='ffill')[list(stocks.values())]
 stat = {}
 window, window_dev = 14, 2
 
-def calculate_annual_volatility(prices):
-    daily_returns = prices.pct_change().dropna()
-    annual_volatility = daily_returns.std() * np.sqrt(252)  # 252는 연간 거래일 수
-    return annual_volatility * 5
+# historical volatility 계산 함수 (새로 추가)
+def calculate_historical_volatility(prices, window=20): # 기본 윈도우는 20일
+    log_returns = np.log(prices / prices.shift(1)).dropna()
+    daily_volatility = log_returns.rolling(window=window).std()
+    annual_volatility = daily_volatility * np.sqrt(252)
+    return annual_volatility.iloc[-1] # 마지막 값 반환
 
 for ticker in data.columns:
     stat[ticker] = {}
@@ -37,8 +39,8 @@ for ticker in data.columns:
     ticker_data_week = ticker_data.resample('W-FRI').last()
     ticker_data_month = ticker_data.resample('M').last()
 
-    # stat[ticker]['b"'] = ticker_data[-240:].pct_change().abs().mean() * 100
-    stat[ticker]['b"'] = calculate_annual_volatility(ticker_data[-252:])
+    # 기존 'b"' 대신 historical volatility 사용
+    stat[ticker]['b"'] = calculate_historical_volatility(ticker_data, 180) * 100
     
     stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data)[-1]
     stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week)[-1]
@@ -49,6 +51,11 @@ for ticker in data.columns:
     stat[ticker]['BB.월'] = ta.volatility.bollinger_pband(ticker_data_month, window, window_dev, True)[-1] * 100
 
 df_stat = pd.DataFrame(data=stat)[::-1]
+
+# KODEX S&P500 기준으로 b"값 정규화
+target_name = stocks['379800']
+df_stat.loc['b"'] = df_stat.loc['b"'] / df_stat.loc['b"', target_name]
+
 df = pd.concat([df, df_stat]).iloc[::-1].T
 
 writer = pd.ExcelWriter('kdrx.xlsx', engine='xlsxwriter')
