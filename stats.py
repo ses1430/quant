@@ -63,11 +63,11 @@ def calculate_stats(prices, obj, tickers):
     # 각 티커에 대해 통계 계산
     for ticker in tickers:
         stats[ticker] = OrderedDict({
-            'forwardPE': '',
-            'trailingPE': '',            
+            'marketCap': '',
             'beta': '',
             'beta"': '', # S&P500 역사적 변동성 대비
-            'marketCap': '',
+            'trailingPE': '',
+            'forwardPE': '',            
         })
 
         # 해당 티커의 데이터가 없는 경우 경고 메시지 출력 후 다음 티커로 이동
