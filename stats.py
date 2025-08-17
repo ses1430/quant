@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from collections import OrderedDict
 import warnings
+import sys
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # 환율 캐싱을 위한 전역 딕셔너리
@@ -152,9 +154,26 @@ def save_to_excel(stats):
 def main():
     """
     메인 함수: 티커 읽기, 데이터 가져오기, 통계 계산, 엑셀 저장 및 열기 과정을 수행합니다.
+    커맨드 라인 인자로 파일명을 받아 처리합니다.
     """
-    tickers = read_tickers()  # 티커 파일 경로에서 티커 목록 읽기
-    
+    # len(sys.argv)는 커맨드 라인 인자의 개수+1(스크립트 파일명 자체) 입니다.
+    # 인자가 주어지면(>1) 그 값을 파일명으로 사용하고, 없으면 기본값을 사용합니다.
+    if len(sys.argv) > 1:
+        ticker_filename = sys.argv[1]
+    else:
+        ticker_filename = 'ticker.txt'  # 기본 파일명
+
+    print(f"'{ticker_filename}' 파일에서 티커 목록을 읽어옵니다.")
+
+    try:
+        tickers = read_tickers(ticker_filename)  # 파일명을 인자로 전달
+    except FileNotFoundError:
+        print(f"오류: '{ticker_filename}' 파일을 찾을 수 없습니다. 프로그램을 종료합니다.")
+        return  # 파일이 없으면 프로그램 종료
+    except Exception as e:
+        print(f"파일을 읽는 중 오류가 발생했습니다: {e}")
+        return
+
     # S&P500 지수 티커 추가 (시장 대비 변동성 계산을 위해)
     if '^GSPC' not in tickers:
         tickers.append('^GSPC') 
@@ -164,9 +183,14 @@ def main():
     
     try:
         stats, basis_change_rate = calculate_stats(prices, obj, tickers)
+        # ^GSPC는 통계 결과에서 제외
+        if '^GSPC' in stats:
+            del stats['^GSPC']
         save_to_excel(stats)
     except Exception as e:
-        print(f"오류가 발생했습니다: {e}")
+        print(f"통계 계산 또는 엑셀 저장 중 오류가 발생했습니다: {e}")
 
 if __name__ == "__main__":
     main()
+
+    

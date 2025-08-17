@@ -8,3 +8,7 @@ year.py
 template.txt
 .gitignore
 screening/material.txt
+screening/healthcare.xlsb
+screening/consumer.xlsb
+screening/indus_util.xlsb
+stats.txt

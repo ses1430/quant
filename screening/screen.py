@@ -42,7 +42,7 @@ df.index = df.index.tz_localize(None)
 
 # 연간 수익률 계산 (2010-2024)
 annual_returns = {}
-for year in range(2010, 2025):
+for year in range(2010, 2026):
     year_data = df[df.index.year == year]
     if not year_data.empty and len(year_data) > 1:
         annual_returns[year] = (year_data.iloc[-1] / year_data.iloc[0] - 1) * 100
@@ -64,7 +64,7 @@ cagr_df = pd.DataFrame(cagr_data)
 
 # 연간 수익률과 CAGR 결합
 performance_df = pd.concat([annual_returns_df, cagr_df], axis=1)
-performance_df.columns = [str(y) for y in range(2010, 2025)] + ['1y', '3y', '5y', '10y']
+performance_df.columns = [str(y) for y in range(2010, 2026)] + ['1y', '3y', '5y', '10y']
 
 # 새로운 추출항목을 위한 데이터프레임 초기화
 additional_data = pd.DataFrame(index=stocks)
