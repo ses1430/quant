@@ -37,18 +37,18 @@ for ticker in data.columns:
     stat[ticker] = {}
     ticker_data = data[ticker]
     ticker_data_week = ticker_data.resample('W-FRI').last()
-    ticker_data_month = ticker_data.resample('M').last()
+    ticker_data_month = ticker_data.resample('ME').last()
 
     # 기존 'b"' 대신 historical volatility 사용
     stat[ticker]['b"'] = calculate_historical_volatility(ticker_data, 180) * 100
     
-    stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data)[-1]
-    stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week)[-1]
-    stat[ticker]['RSI.월'] = ta.momentum.rsi(ticker_data_month)[-1]
+    stat[ticker]['RSI.일'] = ta.momentum.rsi(ticker_data).iloc[-1]
+    stat[ticker]['RSI.주'] = ta.momentum.rsi(ticker_data_week).iloc[-1]
+    stat[ticker]['RSI.월'] = ta.momentum.rsi(ticker_data_month).iloc[-1]
     
-    stat[ticker]['BB.일'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True)[-1] * 100
-    stat[ticker]['BB.주'] = ta.volatility.bollinger_pband(ticker_data_week, window, window_dev, True)[-1] * 100
-    stat[ticker]['BB.월'] = ta.volatility.bollinger_pband(ticker_data_month, window, window_dev, True)[-1] * 100
+    stat[ticker]['BB.일'] = ta.volatility.bollinger_pband(ticker_data, window, window_dev, True).iloc[-1] * 100
+    stat[ticker]['BB.주'] = ta.volatility.bollinger_pband(ticker_data_week, window, window_dev, True).iloc[-1] * 100
+    stat[ticker]['BB.월'] = ta.volatility.bollinger_pband(ticker_data_month, window, window_dev, True).iloc[-1] * 100
 
 df_stat = pd.DataFrame(data=stat)[::-1]
 
