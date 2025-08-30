@@ -3,6 +3,9 @@ import pandas as pd
 from datetime import datetime, timezone, timedelta
 import ta
 import os
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 period = '5y'
 
