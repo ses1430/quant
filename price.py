@@ -13,7 +13,7 @@ stocks = [t.strip() for t in stocks if not t.startswith('#')]
 
 end_date = datetime.now()
 #end_date = datetime(2025,8,1)
-start_date = end_date - timedelta(days=10*365+5)  # 10 years ago
+start_date = end_date - timedelta(days=15*365+5)  # 20 years ago
 
 data = yf.download(stocks, start=start_date, end=end_date, rounding=True, ignore_tz=True)
 df = data['Close']
