@@ -20,7 +20,7 @@ df_days = pd.DataFrame(days)
 df_days.index = days
 
 df = pd.concat([data, df_days], axis=1)
-df = df.fillna(method='ffill')[list(stocks.values())]
+df = df.ffill()[list(stocks.values())]
 
 # rsi, bollinger band 계산
 stat = {}
