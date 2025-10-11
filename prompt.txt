@@ -1,0 +1,68 @@
+
+
+#CompanyName = Alphabet(Google)
+
+You are a professional financial analyst. Your task is to conduct a deep business model analysis of #CompanyName as if you were acquiring 100% of the business.
+Use only high-signal sources: official company filings, annual reports, investor presentations, earnings calls, peer comparisons, market research (Euromonitor, Rabobank, IRI), and expert interviews.
+
+Your analysis must be structured as follows:
+
+1. Business Understanding
+- What products does #CompanyName offer?
+- Revenue breakdown by product, geography, and channel for recent 10 years.
+- Value propositions?
+- Branded vs private label split
+- Key clients and buying process
+- Seasonality and cyclicality by segment
+- Margin structure by segment
+- Is the company self-funding its operations and growth?
+
+2. Market & Competitive Position
+- What is the real Total Addressable Market (TAM/SAM) for its core categories?
+- Key sector tailwinds
+- Direct and indirect competitors
+- Competitive advantages: brand, pricing, scale, distribution, sourcing
+- Are these moats durable over the next 5–10 years? Why?
+- Does #CompanyName have pricing power?
+- Key external threats
+
+3. Financial Profile (2014~)
+- Revenue, EBIT, and FCF trends over 10 years
+- Gross, operating, and net margin evolution
+- ROIC and capital reinvestment rate — is capital deployed efficiently?
+- Capex intensity and working capital structure
+- Net debt, leverage profile, and dilution history
+- Quality and predictability of free cash flows
+
+4. Growth Analysis
+- What were the key growth drivers from 2014? (volume, price, new geographies)
+- What are #CompanyName's stated growth ambitions and management outlook?
+- Which growth levers are still realistic and executable?
+- Rank growth levers by attractiveness and impact on profitability
+- What would need to happen for #CompanyName to double its earnings in 5–7 years?
+
+5. Management & Strategy
+- Who are the key executives? Are they founders or professional managers?
+- Management ownership and alignment with long-term value creation
+- Historical track record: operational execution, capital discipline, margin expansion
+- Capital allocation breakdown: dividends, R&D, M&A, organic capex
+- Long-term strategic priorities: geographic expansion, product innovation, vertical integration?
+
+6. Risk Analysis
+- Top 3–5 structural risks: raw material prices, retailer concentration, competitive pricing, regulation, climate impact
+- What is the impact of a downside scenario (input cost shock, demand slowdown, new competition)?
+- What risk mitigation strategies are in place?
+- Are there any optionalities or strategic assets undervalued by the market?
+
+Final Output:
+- Executive summary of #CompanyName’s business model
+- 10-year financial table (2014~) with Revenue, EBIT, FCF, ROIC
+- Revenue/margin breakdown by segment and geography
+- Moat durability assessment
+- Key growth levers and associated scenarios
+- Capital allocation scorecard
+- Risk map with commentary
+- 2–3 concrete case examples (e.g. export wins, margin improvement, product success)
+
+Do not speculate. Base your output on first-party data and expert-level sources.
+I want all results in Korean.
