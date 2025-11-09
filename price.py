@@ -11,9 +11,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 stocks = open('ticker.txt','r').readlines()
 stocks = [t.strip() for t in stocks if not t.startswith('#')]
 
+# 인자 처리: years (기본값 15)
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--years', type=int, default=15, help='과거 데이터 기간(년 단위, 기본값: 15)')
+args = parser.parse_args()
+
 end_date = datetime.now()
-#end_date = datetime(2025,8,1)
-start_date = end_date - timedelta(days=15*365+5)  # 20 years ago
+start_date = end_date - timedelta(days=args.years*365+5)
 
 data = yf.download(stocks, start=start_date, end=end_date, rounding=True, ignore_tz=True)
 df = data['Close']

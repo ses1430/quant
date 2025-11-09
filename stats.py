@@ -132,8 +132,8 @@ def save_to_excel(stats):
         'marketCap', 
         'beta',
         'beta"',
-        'trailingPE',
-        'forwardPE',
+        #'trailingPE',
+        #'forwardPE',
     ]
     
     # 실제 데이터프레임에 있는 컬럼만 필터링하여 순서 적용
