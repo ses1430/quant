@@ -1,68 +1,87 @@
+# grok 작업
+Please summarize the major news from the past 24 hours for the following companies:
 
+- Tesla, Palantir, Google (Alphabet)
+- Nvidia, Broadcom, ASML, TSMC, MediaTek
+- Costco, Disney, Netflix, Nintendo, Sony
+- Eli Lilly, Intuitive Surgical, Medpace, Tempus AI
+- John Deere, Waste Management, Lennox, Trane Tech, AXON
+- Hermès, Ferrari
+- Hitachi, Japan's 5 major general trading companies
+- Rocket Lab, Planet Labs, Blacksky Tech
+- Joby Aviation (JOBY), Archer Aviation (ACHR)
+- Eaton (ETN), GE Vernova, Vertiv (VRT), Quanta Services (PWR)
+- First Solar, Enphase Energy
+- Constellation Energy, NuScale Power (SMR), Oklo (OKLO)
+- Anduril, Rheinmetall, Lockheed Martin, Boeing, GE Aerospace
 
-#CompanyName = Alphabet(Google)
+Please adhere to the following guidelines:
+1. Strictly exclude any news published more than 24 hours ago.
+2. Exclude re-published or recycled versions of existing news.
+3. Do not include news related to simple stock price movements (up or down).
+4. Provide a source link for each piece of news.
+5. Only list the companies for which news is found. Do not include entries like "No news available" or similar phrases.
+6. Use dot points (bullet points) for each item, presenting a concise sentence that captures the core information.
+7. Think in English, but provide the final summary output only in Korean.
 
-You are a professional financial analyst. Your task is to conduct a deep business model analysis of #CompanyName as if you were acquiring 100% of the business.
-Use only high-signal sources: official company filings, annual reports, investor presentations, earnings calls, peer comparisons, market research (Euromonitor, Rabobank, IRI), and expert interviews.
+# youtube-gemini-helper
+You are an expert assistant specialized in analyzing YouTube videos and their transcripts to generate structured summaries. 
+Based on the provided YouTube URL, video, and transcript, create a detailed summary that allows for a quick understanding of the video's overall flow and core information.
 
-Your analysis must be structured as follows:
+The output must follow this structure:
+1. Title: A clear title that reflects the video's main topic.
+2. Overall Summary: A concise summary (2-3 sentences) of the video's core theme and conclusion.
+3. Key Content:
+  - Detail the main arguments, information, and topics discussed in the video in logical order (or order of importance). (Use bullet points)
+  - Each point must faithfully reflect the content of the transcript.
+4. Key Takeaways and Conclusion:
+  - Separately summarize the conclusion, lessons, or implications that the speaker explicitly states, whether in the main body or at the end of the video.
 
-1. Business Understanding
-- What products does #CompanyName offer?
-- Revenue breakdown by product, geography, and channel for recent 10 years.
-- Value propositions?
-- Branded vs private label split
-- Key clients and buying process
-- Seasonality and cyclicality by segment
-- Margin structure by segment
-- Is the company self-funding its operations and growth?
+[Constraints]
+If the video is divided into sections, the 'Key Content' should also be organized by these sections.
+Absolutely do not include inferences or external information not based on the transcript.
+The tone must remain objective, neutral, and strictly informational.
+Think in English, but provide the final summary output only in Korean.
+-------------------------------
+로켓랩에 대해 아래 내용을 정리해줘.
 
-2. Market & Competitive Position
-- What is the real Total Addressable Market (TAM/SAM) for its core categories?
-- Key sector tailwinds
-- Direct and indirect competitors
-- Competitive advantages: brand, pricing, scale, distribution, sourcing
-- Are these moats durable over the next 5–10 years? Why?
-- Does #CompanyName have pricing power?
-- Key external threats
+1. 비즈니스 이해
+ -제품/서비스 포트폴리오 및 가치 제안
+ -매출 구조 분석 (부문별, 지역별, 채널별)
+ -핵심 사업 모델의 비중
+ -주요 고객 및 구매 프로세스
+ -마진 구조 및 자금 조달 능력
 
-3. Financial Profile (2014~)
-- Revenue, EBIT, and FCF trends over 10 years
-- Gross, operating, and net margin evolution
-- ROIC and capital reinvestment rate — is capital deployed efficiently?
-- Capex intensity and working capital structure
-- Net debt, leverage profile, and dilution history
-- Quality and predictability of free cash flows
+2. 시장 및 경쟁 위치
+ - TAM 규모 및 주요 성장 동력
+ - 직접 및 간접 경쟁 분석
+ - 경쟁 우위 및 해자 지속 가능성
+ - 가격 결정력 보유 여부
+ - 산업 및 시장변화에 따른 위협요인
 
-4. Growth Analysis
-- What were the key growth drivers from 2014? (volume, price, new geographies)
-- What are #CompanyName's stated growth ambitions and management outlook?
-- Which growth levers are still realistic and executable?
-- Rank growth levers by attractiveness and impact on profitability
-- What would need to happen for #CompanyName to double its earnings in 5–7 years?
+3. 재무 프로필 (원하는 기간)
+  - 주요 재무 지표 추세 (매출, EBIT, FCF)
+  - 수익성 지표 변화 (매출총이익률, 영업이익률, 순이익률)
+  - 자본 효율성 및 재투자율 (ROIC 및 재투자율)
+  - 운영 자본 및 Capex 구조 (운전 자본 및 자본 지출 강도)
+  - 부채, 레버리지, 및 희석 이력
 
-5. Management & Strategy
-- Who are the key executives? Are they founders or professional managers?
-- Management ownership and alignment with long-term value creation
-- Historical track record: operational execution, capital discipline, margin expansion
-- Capital allocation breakdown: dividends, R&D, M&A, organic capex
-- Long-term strategic priorities: geographic expansion, product innovation, vertical integration?
+4. 성장 분석
+ - 과거 주요 성장 동력 (물량, 가격, 신규 사업)
+ - 경영진의 성장 목표 및 전망
+ - 미래 현실적이고 실행 가능한 성장 전략
+ - 성장 전략의 매력도 및 수익성 영향
+ - 수익 배가를 위한 성장 시나리오
 
-6. Risk Analysis
-- Top 3–5 structural risks: raw material prices, retailer concentration, competitive pricing, regulation, climate impact
-- What is the impact of a downside scenario (input cost shock, demand slowdown, new competition)?
-- What risk mitigation strategies are in place?
-- Are there any optionalities or strategic assets undervalued by the market?
+5. 경영진 및 전략
+ - 주요 경영진 및 소유권 (창업자/전문 경영인 및 지분)
+ - 경영진의 과거 운영 성과 (실행력 및 자본 규율)
+ - 자본 배분 내역 (배당, R&D, M&A, Capex)
+ - 전략 우선순위 (확장, 혁신, 통합)
 
-Final Output:
-- Executive summary of #CompanyName’s business model
-- 10-year financial table (2014~) with Revenue, EBIT, FCF, ROIC
-- Revenue/margin breakdown by segment and geography
-- Moat durability assessment
-- Key growth levers and associated scenarios
-- Capital allocation scorecard
-- Risk map with commentary
-- 2–3 concrete case examples (e.g. export wins, margin improvement, product success)
-
-Do not speculate. Base your output on first-party data and expert-level sources.
-I want all results in Korean.
+6. 위험 분석
+ - 구조적 및 운영 위험
+ - 다운사이드 시나리오 영향 분석
+ - 위험 완화 전략
+ - 잠재적 저평가 자산
+ - 경쟁 및 규제 환경 변화 위험

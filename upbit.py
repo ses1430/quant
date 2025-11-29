@@ -1,7 +1,7 @@
 import requests
 import json
 
-hist_top_btc = 175846045
+hist_top_btc = 176015280
 btc_amt = 0.42508929
 
 def get_ticker_price(ticker):
