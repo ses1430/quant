@@ -21,10 +21,10 @@ def read_tickers(filename='ticker.txt'):
 
 def get_stock_data(tickers):
     """
-    지정된 티커 목록에 대해 최근 6개월간의 주식 데이터를 다운로드합니다.
+    지정된 티커 목록에 대해 2010년부터 현재까지의 주식 데이터를 다운로드합니다.
     """
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=180)  # 최근 6개월 데이터
+    start_date = '2010-01-01'  # 2010년부터 데이터 다운로드
     # yfinance.download는 여러 티커의 데이터를 멀티인덱스 DataFrame으로 반환합니다.
     return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
 
@@ -49,7 +49,7 @@ def get_exchange_rate(currency):
 
 def calculate_stats(prices, obj, tickers):
     """
-    각 티커에 대한 통계 지표(PE, Beta, 변동성 지표, 시가총액)를 계산합니다.
+    각 티커에 대한 통계 지표(PE, Beta, 변동성 지표, 시가총액)와 연도별 수익률을 계산합니다.
     """
     stats = OrderedDict()
     sp500_change_rate = None  # S&P500 지수의 일일 변동율 저장용
@@ -111,13 +111,29 @@ def calculate_stats(prices, obj, tickers):
         else:
             stats[ticker]['marketCap'] = ''
 
-        # 최종 통계 딕셔너리 업데이트
+        # 최종 통계 딕셔너리 업데이트 (기존 통계)
         stats[ticker].update({
             'beta': info.get('beta', ''), # yfinance에서 제공하는 베타값
             'beta"': relative_historical_vol_vs_sp500,
             'trailingPE': info.get('trailingPE', ''),
             'forwardPE': info.get('forwardPE', ''),
         })
+
+        # 연도별 수익률 계산 추가
+        yearly_prices = stock_close_prices.resample('Y').last().dropna()  # 연도별 마지막 종가
+        years = range(2011, 2026)  # 2011부터 2025까지
+        for year in years:
+            prev_year_end = yearly_prices.loc[f'{year-1}-12-31':f'{year-1}-12-31'].values
+            current_year_end = yearly_prices.loc[f'{year}-12-31':f'{year}-12-31'].values
+            
+            if len(prev_year_end) > 0 and len(current_year_end) > 0:
+                prev_price = prev_year_end[0]
+                curr_price = current_year_end[0]
+                return_rate = ((curr_price - prev_price) / prev_price) * 100 if prev_price != 0 else ''
+                stats[ticker][str(year)] = round(return_rate, 2) if return_rate != '' else ''
+            else:
+                stats[ticker][str(year)] = ''  # 데이터 없으면 빈 값
+
     return stats, sp500_change_rate.mean() * 100 if sp500_change_rate is not None else None
 
 def save_to_excel(stats):
@@ -127,14 +143,14 @@ def save_to_excel(stats):
     """
     df = pd.DataFrame.from_dict(stats, orient='index')
     
-    # 원하는 열 순서 정의 (PE, Beta, 변동성 지표들, MarketCap)
+    # 원하는 열 순서 정의 (PE, Beta, 변동성 지표들, MarketCap, 연도별 수익률)
     desired_columns_order = [
         'marketCap', 
         'beta',
         'beta"',
         #'trailingPE',
         #'forwardPE',
-    ]
+    ] + [str(year) for year in range(2011, 2026)]  # 연도 컬럼 추가
     
     # 실제 데이터프레임에 있는 컬럼만 필터링하여 순서 적용
     # intersection을 사용하여 실제 데이터에 없는 컬럼이 있어도 오류가 발생하지 않도록 합니다.
@@ -192,5 +208,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    

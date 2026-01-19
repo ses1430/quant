@@ -29,7 +29,7 @@ window, window_dev = 14, 2
 # historical volatility 계산 함수 (새로 추가)
 def calculate_historical_volatility(prices, window=20): # 기본 윈도우는 20일
     log_returns = np.log(prices / prices.shift(1)).dropna()
-    daily_volatility = log_returns.rolling(window=window).std()
+    daily_volatility = log_returns.rolling(window=min(window, len(log_returns))).std()
     annual_volatility = daily_volatility * np.sqrt(252)
     return annual_volatility.iloc[-1] # 마지막 값 반환
 

@@ -1,2 +1,3 @@
 ^GSPC
-SYM
+BX
+BLK

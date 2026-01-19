@@ -14,7 +14,7 @@ stocks = [t.strip() for t in stocks if not t.startswith('#')]
 # 인자 처리: years (기본값 15)
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--years', type=int, default=15, help='과거 데이터 기간(년 단위, 기본값: 15)')
+parser.add_argument('--years', type=int, default=16, help='과거 데이터 기간(년 단위, 기본값: 15)')
 args = parser.parse_args()
 
 end_date = datetime.now()
