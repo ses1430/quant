@@ -94,9 +94,17 @@ def calculate_stats(prices, obj, tickers):
         # yfinance info 객체에서 기본 정보 가져오기
         info = obj[ticker].info
         currency = info.get('currency', 'USD')  # 통화 확인
-        market_cap = info.get('marketCap', 0)   # 시가총액 가져오기
+        quote_type = info.get('quoteType')      # 종목 타입 확인 (EQUITY, ETF 등)
 
-        # 시가총액을 달러로 변환 (필요시)
+        # 1. 종목 타입에 따라 시총(Market Cap) 또는 AUM(Total Assets) 선택
+        if quote_type == 'ETF':
+            # ETF인 경우 AUM(totalAssets)을 가져옴
+            market_cap = info.get('totalAssets', 0)
+        else:
+            # 개별 종목인 경우 기존처럼 marketCap을 가져옴
+            market_cap = info.get('marketCap', 0)
+
+        # 2. 시가총액(또는 AUM)을 달러로 변환
         if market_cap and market_cap != '':
             if currency != 'USD':
                 try:                    
@@ -123,7 +131,7 @@ def calculate_stats(prices, obj, tickers):
         yearly_prices = stock_close_prices.resample('Y').last().dropna()  # 연도별 마지막 종가
         years = range(2011, 2026)  # 2011부터 2025까지
         for year in years:
-            prev_year_end = yearly_prices.loc[f'{year-1}-12-31':f'{year-1}-12-31'].values
+            prev_year_end    = yearly_prices.loc[f'{year-1}-12-31':f'{year-1}-12-31'].values
             current_year_end = yearly_prices.loc[f'{year}-12-31':f'{year}-12-31'].values
             
             if len(prev_year_end) > 0 and len(current_year_end) > 0:
@@ -148,8 +156,8 @@ def save_to_excel(stats):
         'marketCap', 
         'beta',
         'beta"',
-        #'trailingPE',
-        #'forwardPE',
+        'trailingPE',
+        'forwardPE',
     ] + [str(year) for year in range(2011, 2026)]  # 연도 컬럼 추가
     
     # 실제 데이터프레임에 있는 컬럼만 필터링하여 순서 적용

@@ -1,2 +1,3 @@
 ^GSPC
-MU
+ADI
+TXN
