@@ -1,3 +1,2 @@
 ^GSPC
-ADI
-TXN
+EWY
