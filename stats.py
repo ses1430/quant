@@ -43,6 +43,7 @@ def get_exchange_rate(currency):
     if not data.empty and ticker in data['Close'].columns: # 데이터가 있고 해당 티커 컬럼이 있는지 확인
         exchange_rate = data['Close'][ticker].iloc[-1]
         exchange_rates[currency] = exchange_rate  # 딕셔너리에 저장
+        # print(f"환율 정보: 1 {currency} = {exchange_rate:.4f} USD (캐싱됨)")
         return exchange_rate
     else:
         raise ValueError(f"환율 데이터를 가져오지 못했습니다: {currency}")
@@ -106,16 +107,22 @@ def calculate_stats(prices, obj, tickers):
 
         # 2. 시가총액(또는 AUM)을 달러로 변환
         if market_cap and market_cap != '':
-            if currency != 'USD':
+            if currency == 'USD':
+                stats[ticker]['marketCap'] = round(market_cap / 1e9, 1)  # 억 달러 단위로 표시
+            elif currency == 'KRW':
+                stats[ticker]['marketCap'] = round(market_cap / 1e8, 1)  # 억 원 단위로 표시
+            else:
                 try:                    
                     exchange_rate = get_exchange_rate(currency)  # 환율 가져오기
                     market_cap_usd = market_cap * exchange_rate  # 달러로 변환
+                    stats[ticker]['marketCap'] = round(market_cap_usd / 1e9, 1)  # 억 달러 단위로 표시
                 except Exception as e:
                     print(f"{ticker} 시가총액 변환 오류: {e}")
                     market_cap_usd = ''
-            else:
-                market_cap_usd = market_cap
-            stats[ticker]['marketCap'] = round(market_cap_usd / 1e9, 1)  # 억 달러 단위로 표시
+                    stats[ticker]['marketCap'] = ''
+
+            if currency == 'KRW':
+                stats[ticker]['marketCap'] = market_cap / 1e8  # 억 원 단위로 표시
         else:
             stats[ticker]['marketCap'] = ''
 

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from pykrx import stock; import inspect; print\\(inspect.getfile\\(stock\\)\\)\")"
+    ]
+  }
+}

@@ -127,3 +127,85 @@ Think in English, but provide the final summary output only in Korean.
 모든 수치와 판단 근거는 최신 공개 데이터와 역사적 통계로 뒷받침하세요. 
 불확실한 부분은 명확히 밝히고, "모른다"라고 말하는 것도 허용됩니다. 
 결론은 단호하고 간결하게, 한국어로 제시하세요.
+--------------------------------------------------
+[시스템 역할] 당신은 유튜브 영상과 트랜스크립트를 분석하여, 영상의 모든 내용을 누락 없이 상세한 텍스트 문서로 변환하는 전문 어시스턴트입니다.
+
+영상 URL : ${url}
+
+[작업 지침: 절대 준수]
+1. 무요약 원칙: 어떠한 정보도 요약, 압축, 생략하지 마십시오. "요약하면", "결론적으로 말해"와 같은 표현을 지양하고, 화자의 모든 논리와 근거를 서술형으로 풀어서 설명하십시오.
+2. 타임스탬프 기록: 주요 내용이 바뀌거나 새로운 논점이 등장할 때마다 해당 부분의 시작 타임스탬프(예:)를 반드시 기재하십시오.
+3. 시각 요소 포함: 영상 내 자막, 도표, 그래프, 시연 장면 등 시각적으로 전달되는 핵심 정보가 있다면 트랜스크립트 내용과 결합하여 상세히 설명하십시오.
+4. 전문성 유지: 기술 용어, 고유 명사, 수치는 100% 정확하게 기록하십시오. 모호한 번역보다는 용어(Original Term) 형식을 사용하십시오.
+
+[출력 구조]
+1. 영상 기본 정보: 제목, 채널명(알 수 있는 경우), 전체 길이.
+2. 상세 타임라인 기록:
+  - 각 섹션별로 헤드라인을 작성하고, 그 아래에 화자의 발언 내용, 사례, 데이터, 비유를 상세한 문단 형태로 작성하십시오.
+  - 비교 분석이 있다면 각 항목의 차이점을 구체적인 수치와 함께 기술하십시오.
+3. 핵심 메시지 및 향후 전망:
+  - 화자가 강조한 최종 논거와 교훈, 미래 예측 등을 상세히 기록하십시오.
+  - 영상의 마지막 멘트와 뉘앙스까지 충실히 반영하십시오.
+
+[제약 및 언어]
+외부 지식을 더하지 말고 오직 제공된 영상 소스에만 충실하십시오.
+모든 사고 과정은 영어로 진행하되, 최종 결과물은 오직 한국어로만 작성하십시오.
+-------------------------------------------------------------------------
+You are an expert assistant specialized in converting YouTube videos and their transcripts into comprehensive, detailed text documents.Based on the provided YouTube URL, video, and transcript, create a full textual representation of the content.
+
+**CRITICAL INSTRUCTION:**
+Do NOT summarize, condense, or abbreviate the information.
+Your goal is to provide a maximally detailed account of the video so the user can understand every specific detail, argument, example, and number mentioned without watching the video.
+
+The output must follow this structure:
+
+1. Metadata
+- Title: The exact or most appropriate title of the video.
+- Uploader: The name of the channel or individual who uploaded the video.
+- Length: The total duration of the video in minutes and seconds.
+
+2. Comprehensive Content Breakdown:
+- Reconstruct the video's content chronologically or logically.
+- Include all details: Specific numbers, dates, proper nouns, quotes, and examples must be preserved.
+- Explain fully: Instead of short bullet points, use full sentences or detailed paragraphs to explain the speaker's logic and context.
+- If the video compares A and B, detail every aspect of the comparison.
+- If the video tells a story, include the beginning, middle, and end in detail.
+- Timestamping: Mandatory inclusion of start timestamps (e.g., [01:23]) whenever there is a shift in the main topic or a new point of discussion is introduced.
+- Professional Accuracy: Maintain 100% accuracy for technical jargon, proper nouns, and numerical data. To avoid ambiguity, use the format "Translated Term (Original Term)" for key terminology.
+
+3. Core Message & Conclusion
+- Detail the final arguments, lessons, or future outlooks mentioned by the speaker.
+- Capture the speaker's final tone and specific closing remarks.
+
+[Constraints]
+- NO SUMMARIZATION: Do not use phrases like "In short" or "Briefly." Cover everything.
+- Strict Adherence: Stick strictly to the provided transcript. Do not add outside knowledge, but do not omit information from the transcript.
+- Tone: Objective, descriptive, and thorough.
+- Language: Think in English, but provide the final output ONLY in Korean.
+-----------------------------------------------
+아래에 명시된 섹션/기업들의 최근 24시간 동안의 뉴스를 정리해주세요.
+
+# 테크 : Tesla, Palantir, Google (Alphabet), Apple, Amazon, Microsoft, Meta, Oracle
+# 펩리스 : Nvidia, Broadcom, ASML, Intel, Micron, TSMC, Marvell Tech.
+# 반도체 기타 : Navitas Semiconductor, Monolithic Power Systems, ON Semiconductor, POET, Coherent, Lumentum Holdings
+# 소비재/미디어 : Costco Wholesale, Disney, Netflix, Nintendo, Sony, Warner Bros., Domino Pizza
+# 헬스케어 : Eli Lilly, Intuitive Surgical, Medpace, Tempus AI, Isomorphic Labs, Novo Nordisk
+# 산업재 : John Deere, Waste Management, Caterpillar, Lennox, Trane Tech, AXON, Parker-Hannifin, Mueller Industries, Comfort Systems USA
+# 지위재 : Hermès, LVMH, Ferrari, Lamborghini
+# 일본상사 : Hitachi, AdvanTest, Sumitomo Electric, Japan's 5 major general trading companies
+# 일본 : AdvanTest, Sumitomo Electric, 
+# 우주 : SpaceX, Rocket Lab, Planet Labs, Blacksky Tech, Varda Space, Howmet Aerospace, AST SpaceMobile
+# 태양광 : First Solar, Enphase Energy
+# 전력망 : Eaton, GE Vernova, Vertiv, Quanta Services (PWR), Vistra
+# 원자력/SMR : Constellation Energy, NuScale Power (SMR), Oklo (OKLO)
+# 방위산업 : Anduril, Lockheed Martin, RTX,  Boeing, GE Aerospace
+# 유럽 : Rheinmetall, Kongsberg Gruppen ASA, Saab AB, Fincantieri
+# 금융 : Blackstone, Goldman Sachs, Visa, JPMorgan Chase
+
+1. 24시간 이전에 게재된 뉴스는 엄격히 제외합니다.
+2. 기존 뉴스를 재게재하거나 재활용한 버전은 제외합니다.
+3. 단순한 주가 변동(상승 또는 하락)과 관련된 뉴스는 포함하지 않습니다.
+4. 반드시 각 뉴스에 출처를 내용 끝에 아이콘 링크 형태로 포함해야 합니다.
+5. 뉴스가 확인된 기업만 목록에 포함합니다. "관련 뉴스 없음" 등의 항목은 포함하지 않습니다.
+6. 각 섹션명을 소제목으로, 소제목 하위에 Bullet Point로 "기업명 : 내용"을 제시하고, 내용은 핵심을 담은 간결한 문장으로 표현합니다.
+7. 영어로 사고하되, 최종 요약 결과물은 한국어로만 제공합니다.
