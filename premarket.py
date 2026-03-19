@@ -1,59 +1,61 @@
-import yfinance as yf
-import pandas as pd
 import os
+import warnings
 
-# 티커 목록이 포함된 파일 읽기 (예: tickers.txt)
-def read_tickers(file_path):
-    with open(file_path, 'r') as file:
-        tickers = [line.strip() for line in file if line.strip()]
-    return tickers
+import pandas as pd
+import yfinance as yf
 
-# 가장 최근 가격 가져오기
-def get_latest_prices(tickers):
-    latest_data = {'Ticker': [], 'Latest Price': []}
-    
-    for ticker in tickers:
+warnings.simplefilter(action="ignore", category=FutureWarning)
+
+# ── 상수 ──────────────────────────────────────────────────────────────────────
+TICKER_FILE = "ticker.txt"
+OUTPUT_FILE = "premarket.xlsx"
+PERIOD = "2d"
+INTERVAL = "1m"
+
+
+# ── 유틸 ──────────────────────────────────────────────────────────────────────
+def load_tickers(path: str = TICKER_FILE) -> list[str]:
+    with open(path, "r") as f:
+        return [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
+
+# ── 데이터 로딩 ───────────────────────────────────────────────────────────────
+def fetch_latest_price(ticker: str) -> float | str:
+    """단일 티커의 프리/애프터마켓 포함 최근 가격 반환."""
+    hist = yf.Ticker(ticker).history(period=PERIOD, prepost=True, interval=INTERVAL)
+    if not hist.empty:
+        return hist["Close"].iloc[-1]
+    return "데이터 없음"
+
+
+def build_price_table(tickers: list[str]) -> pd.DataFrame:
+    records = []
+    for i, ticker in enumerate(tickers, 1):
+        print(f"  [{i}/{len(tickers)}] {ticker}")
         try:
-            stock = yf.Ticker(ticker)
-            
-            # 최근 2일 데이터 가져오기 (프리장/장후 포함)
-            hist = stock.history(period="2d", prepost=True, interval="1m")
-            
-            latest_data['Ticker'].append(ticker)
-            if not hist.empty:
-                # 가장 최근 종가 가져오기
-                latest_price = hist['Close'].iloc[-1]
-                latest_data['Latest Price'].append(latest_price)
-            elif len(hist) > 1:
-                # 데이터가 없으면 전일 종가 가져오기
-                previous_close = hist['Close'].iloc[-2]  # 전일 종가
-                latest_data['Latest Price'].append(previous_close)
-            else:
-                latest_data['Latest Price'].append("데이터 없음")
-                
+            price = fetch_latest_price(ticker)
         except Exception as e:
-            latest_data['Ticker'].append(ticker)
-            latest_data['Latest Price'].append(f"에러: {str(e)}")
-    
-    return latest_data
+            price = f"에러: {e}"
+        records.append({"Ticker": ticker, "Latest Price": price})
+    return pd.DataFrame(records)
 
-# 메인 실행
+
+# ── 엑셀 출력 ─────────────────────────────────────────────────────────────────
+def export_excel(df: pd.DataFrame, path: str) -> None:
+    with pd.ExcelWriter(path, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Sheet1")
+
+
+# ── 메인 ──────────────────────────────────────────────────────────────────────
+def main() -> None:
+    tickers = load_tickers()
+    print(f"[1/2] {len(tickers)}개 종목 가격 수집 중 (프리/애프터마켓 포함)...")
+    df = build_price_table(tickers)
+
+    print(f"[2/2] 엑셀 저장 → {OUTPUT_FILE}")
+    export_excel(df, OUTPUT_FILE)
+    os.startfile(OUTPUT_FILE)
+
+
 if __name__ == "__main__":
-    # 티커 파일 경로 (사용자 환경에 맞게 수정 필요)
-    file_path = "ticker.txt"
-    
-    # 티커 읽기
-    tickers = read_tickers(file_path)
-    
-    # 가장 최근 가격 가져오기
-    data = get_latest_prices(tickers)
-    
-    # 데이터프레임으로 변환
-    df = pd.DataFrame(data)
-    
-    # 엑셀 파일로 저장
-    output_file = "premarket.xlsx"
-    df.to_excel(output_file, index=False)
-
-    # 엑셀 파일 열기
-    os.startfile("premarket.xlsx")
+    main()

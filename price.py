@@ -63,7 +63,8 @@ def compute_indicators(series: pd.Series) -> dict[str, float]:
             ta.volatility.bollinger_pband(s, BB_WINDOW, BB_DEV, fillna=True).iloc[-1] * 100
         )
 
-    return result
+    order = ["RSI.D", "RSI.W", "RSI.M", "BB.D", "BB.W", "BB.M"]
+    return {k: result[k] for k in order}
 
 
 def build_stat(close: pd.DataFrame, tickers: list[str]) -> pd.DataFrame:

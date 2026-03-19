@@ -18,7 +18,6 @@ BB_WINDOW = 14
 BB_DEV = 2.0
 
 REFERENCE_TICKER_CODE = '379800'          # KODEX S&P500 (정규화 기준)
-MARCAP_UNIT = "조"                        # "조" 또는 "억" 선택 가능
 # ============================================
 
 
@@ -89,29 +88,6 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
     return pd.DataFrame(stats)
 
 
-def add_market_cap(stat_df: pd.DataFrame, ticker_dict: Dict[str, str], unit: str = "조") -> pd.DataFrame:
-    """KRX-MARCAP에서 최신 시가총액 추가"""
-    try:
-        print("📥 시가총액(MARCAP) 데이터 불러오는 중...")
-        marcap_df = fdr.StockListing('KRX-MARCAP')
-        print(marcap_df.head())
-        marcap_dict = marcap_df.set_index('Code')['Marcap'].to_dict()
-        
-        marcap_series = pd.Series({
-            name: marcap_dict.get(code, np.nan)
-            for code, name in ticker_dict.items()
-        })
-        
-        col_name = f'Marcap({unit})'
-        divisor = 1_000_000_000_000 if unit == "조" else 100_000_000
-        stat_df.loc[col_name] = (marcap_series / divisor).round(2)
-        print(f"✅ 시가총액 추가 완료 → {col_name}")
-        
-    except Exception as e:
-        print(f"⚠️ 시가총액 로드 실패: {e}")
-    
-    return stat_df
-
 
 def normalize_volatility(stat_df: pd.DataFrame, ref_name: str) -> pd.DataFrame:
     """KODEX S&P500 기준 HV.180 정규화"""
@@ -132,18 +108,20 @@ def main():
     # 2. 기술적 지표 계산
     stat_df = calculate_indicators(price_df, ticker_dict)
     
-    # 3. 시가총액 추가
-    stat_df = add_market_cap(stat_df, ticker_dict, MARCAP_UNIT)
-    
-    # 4. Volatility 정규화
+    # 3. Volatility 정규화
     stat_df = normalize_volatility(stat_df, ref_name)
     
     # ==================== 핵심 수정 ====================
     # 가격 컬럼을 최근 날짜 → 과거 날짜 순으로 정렬 (엑셀 보기 편하게)
     price_sorted = price_df.sort_index(ascending=False)
-    
+
     # 지표 먼저 + 최근→과거 가격 순으로 concat → .T
     combined = pd.concat([stat_df, price_sorted], axis=0)
+
+    # kor_ticker.dat 파일 순서대로 열(종목) 정렬
+    ordered_names = [name for name in ticker_dict.values() if name in combined.columns]
+    combined = combined[ordered_names]
+
     result = combined.T
     # ==================================================
     
