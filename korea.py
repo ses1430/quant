@@ -17,7 +17,7 @@ RSI_WINDOW = 14
 BB_WINDOW = 14
 BB_DEV = 2.0
 
-REFERENCE_TICKER_CODE = '379800'          # KODEX S&P500 (정규화 기준)
+REFERENCE_TICKER_CODE = '005930'          # 삼성전자 (KODEX S&P500 대체)
 # ============================================
 
 
@@ -99,7 +99,7 @@ def normalize_volatility(stat_df: pd.DataFrame, ref_name: str) -> pd.DataFrame:
 
 def main():
     ticker_dict = load_ticker_dict(TICKER_FILE)
-    ref_name = ticker_dict.get(REFERENCE_TICKER_CODE, "KODEX S&P500")
+    ref_name = ticker_dict.get(REFERENCE_TICKER_CODE, "삼성전자")
     
     # 1. 데이터 다운로드 & 캘린더 채우기
     price_df = download_close_data(ticker_dict, YEARS_BACK)

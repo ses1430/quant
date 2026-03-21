@@ -1,180 +1,138 @@
 import yfinance as yf
 import os
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import OrderedDict
 import warnings
 import sys
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# 환율 캐싱을 위한 전역 딕셔너리
 exchange_rates = {}
 
+
 def read_tickers(filename='ticker.txt'):
-    """
-    'ticker.txt' 파일에서 티커 목록을 읽어옵니다.
-    #으로 시작하는 줄은 주석으로 간주하여 제외합니다.
-    """
-    with open(filename, 'r') as file:
-        return [t.strip() for t in file if not t.startswith('#')]
+    with open(filename, 'r') as f:
+        return [t.strip() for t in f if t.strip() and not t.startswith('#')]
+
 
 def get_stock_data(tickers):
-    """
-    지정된 티커 목록에 대해 2010년부터 현재까지의 주식 데이터를 다운로드합니다.
-    """
-    end_date = datetime.now()
-    start_date = '2010-01-01'  # 2010년부터 데이터 다운로드
-    # yfinance.download는 여러 티커의 데이터를 멀티인덱스 DataFrame으로 반환합니다.
-    return yf.download(tickers, start=start_date, end=end_date, interval='1d', rounding=True, ignore_tz=True)
+    return yf.download(tickers, start='2010-01-01', end=datetime.now(), interval='1d', rounding=True, ignore_tz=True)
+
 
 def get_exchange_rate(currency):
-    """
-    해당 통화의 달러 환율을 가져오는 함수입니다.
-    가져온 환율은 캐싱하여 불필요한 API 호출을 줄입니다.
-    """
     if currency == 'USD':
         return 1.0
     if currency in exchange_rates:
-        return exchange_rates[currency]  # 캐싱된 환율 반환
+        return exchange_rates[currency]
 
-    ticker = f"{currency}USD=X"  # 예: JPYUSD=X는 엔화-달러 환율
+    ticker = f"{currency}USD=X"
     data = yf.download(ticker, period='1d')
-    if not data.empty and ticker in data['Close'].columns: # 데이터가 있고 해당 티커 컬럼이 있는지 확인
-        exchange_rate = data['Close'][ticker].iloc[-1]
-        exchange_rates[currency] = exchange_rate  # 딕셔너리에 저장
-        # print(f"환율 정보: 1 {currency} = {exchange_rate:.4f} USD (캐싱됨)")
-        return exchange_rate
+    if not data.empty and ticker in data['Close'].columns:
+        exchange_rates[currency] = data['Close'][ticker].iloc[-1]
+        return exchange_rates[currency]
+
+    raise ValueError(f"환율 데이터를 가져오지 못했습니다: {currency}")
+
+
+def _calc_market_cap(info, currency):
+    if info.get('quoteType') == 'ETF':
+        market_cap = info.get('totalAssets', 0)
     else:
-        raise ValueError(f"환율 데이터를 가져오지 못했습니다: {currency}")
+        market_cap = info.get('marketCap', 0)
+
+    if not market_cap:
+        return ''
+    if currency == 'USD':
+        return round(market_cap / 1e9, 1)
+    if currency == 'KRW':
+        return round(market_cap / 1e8, 1)
+
+    exchange_rate = get_exchange_rate(currency)
+    return round(market_cap * exchange_rate / 1e9, 1)
+
 
 def calculate_stats(prices, obj, tickers):
-    """
-    각 티커에 대한 통계 지표(PE, Beta, 변동성 지표, 시가총액)와 연도별 수익률을 계산합니다.
-    """
     stats = OrderedDict()
-    sp500_change_rate = None  # S&P500 지수의 일일 변동율 저장용
-    sp500_historical_volatility = None # S&P500 지수의 역사적 변동성 저장용
+    sp500_change_rate = None
+    sp500_historical_volatility = None
 
-    # S&P500 지수의 일일 변동율 및 역사적 변동성 계산
     if '^GSPC' in prices['Close'].columns:
-        sp500_prices = prices['Close']['^GSPC']
-        sp500_change_rate = sp500_prices.pct_change()  # S&P500 일일 변동율
+        sp500_change_rate = prices['Close']['^GSPC'].pct_change()
         if not sp500_change_rate.empty:
             sp500_historical_volatility = sp500_change_rate.std() * (252**0.5) * 100
 
-    # 각 티커에 대해 통계 계산
     for ticker in tickers:
         stats[ticker] = OrderedDict({
             'marketCap': '',
             'beta': '',
-            'beta"': '', # S&P500 역사적 변동성 대비
+            'beta"': '',
             'trailingPE': '',
-            'forwardPE': '',            
+            'forwardPE': '',
         })
 
-        # 해당 티커의 데이터가 없는 경우 경고 메시지 출력 후 다음 티커로 이동
         if ticker not in prices['Close'].columns:
             print(f"경고: {ticker}에 대한 데이터를 찾을 수 없습니다.")
             continue
 
-        # 주식의 일일 변동율 계산 (Historical Volatility 계산에 사용)
         stock_close_prices = prices['Close'][ticker]
-        stock_change_rate = stock_close_prices.pct_change()  # 주식 일일 변동율
+        stock_change_rate = stock_close_prices.pct_change()
 
-        # 1. 역사적 변동성 (Historical Volatility, HV) 계산 (계산은 유지하되, 결과에 포함하지 않음)
-        historical_volatility = ''
+        historical_volatility = None
         if not stock_change_rate.empty:
             historical_volatility = stock_change_rate.std() * (252**0.5) * 100
-        
-        # historicalVolatility를 S&P500 historicalVolatility로 나눈 값 계산
+
         relative_historical_vol_vs_sp500 = ''
-        if historical_volatility != '' and sp500_historical_volatility is not None and sp500_historical_volatility != 0:
+        if historical_volatility is not None and sp500_historical_volatility:
             relative_historical_vol_vs_sp500 = historical_volatility / sp500_historical_volatility
 
-        # yfinance info 객체에서 기본 정보 가져오기
         info = obj[ticker].info
-        currency = info.get('currency', 'USD')  # 통화 확인
-        quote_type = info.get('quoteType')      # 종목 타입 확인 (EQUITY, ETF 등)
+        currency = info.get('currency', 'USD')
 
-        # 1. 종목 타입에 따라 시총(Market Cap) 또는 AUM(Total Assets) 선택
-        if quote_type == 'ETF':
-            # ETF인 경우 AUM(totalAssets)을 가져옴
-            market_cap = info.get('totalAssets', 0)
-        else:
-            # 개별 종목인 경우 기존처럼 marketCap을 가져옴
-            market_cap = info.get('marketCap', 0)
+        try:
+            market_cap_val = _calc_market_cap(info, currency)
+        except Exception as e:
+            print(f"{ticker} 시가총액 변환 오류: {e}")
+            market_cap_val = ''
 
-        # 2. 시가총액(또는 AUM)을 달러로 변환
-        if market_cap and market_cap != '':
-            if currency == 'USD':
-                stats[ticker]['marketCap'] = round(market_cap / 1e9, 1)  # 억 달러 단위로 표시
-            elif currency == 'KRW':
-                stats[ticker]['marketCap'] = round(market_cap / 1e8, 1)  # 억 원 단위로 표시
-            else:
-                try:                    
-                    exchange_rate = get_exchange_rate(currency)  # 환율 가져오기
-                    market_cap_usd = market_cap * exchange_rate  # 달러로 변환
-                    stats[ticker]['marketCap'] = round(market_cap_usd / 1e9, 1)  # 억 달러 단위로 표시
-                except Exception as e:
-                    print(f"{ticker} 시가총액 변환 오류: {e}")
-                    market_cap_usd = ''
-                    stats[ticker]['marketCap'] = ''
-
-            if currency == 'KRW':
-                stats[ticker]['marketCap'] = market_cap / 1e8  # 억 원 단위로 표시
-        else:
-            stats[ticker]['marketCap'] = ''
-
-        # 최종 통계 딕셔너리 업데이트 (기존 통계)
         stats[ticker].update({
-            'beta': info.get('beta', ''), # yfinance에서 제공하는 베타값
+            'marketCap': market_cap_val,
+            'beta': info.get('beta', ''),
             'beta"': relative_historical_vol_vs_sp500,
             'trailingPE': info.get('trailingPE', ''),
             'forwardPE': info.get('forwardPE', ''),
         })
 
-        # 연도별 수익률 계산 추가
-        yearly_prices = stock_close_prices.resample('Y').last().dropna()  # 연도별 마지막 종가
-        years = range(2011, 2026)  # 2011부터 2025까지
-        for year in years:
-            prev_year_end    = yearly_prices.loc[f'{year-1}-12-31':f'{year-1}-12-31'].values
-            current_year_end = yearly_prices.loc[f'{year}-12-31':f'{year}-12-31'].values
-            
-            if len(prev_year_end) > 0 and len(current_year_end) > 0:
-                prev_price = prev_year_end[0]
-                curr_price = current_year_end[0]
-                return_rate = ((curr_price - prev_price) / prev_price) * 100 if prev_price != 0 else ''
-                stats[ticker][str(year)] = round(return_rate, 2) if return_rate != '' else ''
+        yearly_prices = stock_close_prices.resample('Y').last().dropna()
+        for year in range(2011, 2026):
+            prev = yearly_prices.loc[f'{year-1}-12-31':f'{year-1}-12-31'].values
+            curr = yearly_prices.loc[f'{year}-12-31':f'{year}-12-31'].values
+            if len(prev) > 0 and len(curr) > 0 and prev[0] != 0:
+                stats[ticker][str(year)] = round(((curr[0] - prev[0]) / prev[0]) * 100, 2)
             else:
-                stats[ticker][str(year)] = ''  # 데이터 없으면 빈 값
+                stats[ticker][str(year)] = ''
 
-    return stats, sp500_change_rate.mean() * 100 if sp500_change_rate is not None else None
+    sp500_mean = sp500_change_rate.mean() * 100 if sp500_change_rate is not None else None
+    return stats, sp500_mean
+
 
 def save_to_excel(stats):
-    """
-    계산된 통계 데이터를 'stats.xlsx' 파일로 저장하고 엽니다.
-    열 순서를 재정렬하여 가독성을 높입니다.
-    """
     df = pd.DataFrame.from_dict(stats, orient='index')
-    
-    # 원하는 열 순서 정의 (PE, Beta, 변동성 지표들, MarketCap, 연도별 수익률)
+
     desired_columns_order = [
-        'marketCap', 
+        'marketCap',
         'beta',
         'beta"',
         'trailingPE',
         'forwardPE',
-    ] + [str(year) for year in range(2011, 2026)]  # 연도 컬럼 추가
-    
-    # 실제 데이터프레임에 있는 컬럼만 필터링하여 순서 적용
-    # intersection을 사용하여 실제 데이터에 없는 컬럼이 있어도 오류가 발생하지 않도록 합니다.
-    df = df[df.columns.intersection(desired_columns_order)]
+    ] + [str(year) for year in range(2011, 2026)]
+
+    existing = set(df.columns)
+    df = df[[c for c in desired_columns_order if c in existing]]
 
     with pd.ExcelWriter('stats.xlsx', engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Sheet1')
-    
-    # 생성된 엑셀 파일 열기 (Windows 환경 가정)
+
     try:
         os.startfile("stats.xlsx")
     except AttributeError:
@@ -182,44 +140,33 @@ def save_to_excel(stats):
     except Exception as e:
         print(f"엑셀 파일 열기 중 오류 발생: {e}")
 
-def main():
-    """
-    메인 함수: 티커 읽기, 데이터 가져오기, 통계 계산, 엑셀 저장 및 열기 과정을 수행합니다.
-    커맨드 라인 인자로 파일명을 받아 처리합니다.
-    """
-    # len(sys.argv)는 커맨드 라인 인자의 개수+1(스크립트 파일명 자체) 입니다.
-    # 인자가 주어지면(>1) 그 값을 파일명으로 사용하고, 없으면 기본값을 사용합니다.
-    if len(sys.argv) > 1:
-        ticker_filename = sys.argv[1]
-    else:
-        ticker_filename = 'ticker.txt'  # 기본 파일명
 
+def main():
+    ticker_filename = sys.argv[1] if len(sys.argv) > 1 else 'ticker.txt'
     print(f"'{ticker_filename}' 파일에서 티커 목록을 읽어옵니다.")
 
     try:
-        tickers = read_tickers(ticker_filename)  # 파일명을 인자로 전달
+        tickers = read_tickers(ticker_filename)
     except FileNotFoundError:
         print(f"오류: '{ticker_filename}' 파일을 찾을 수 없습니다. 프로그램을 종료합니다.")
-        return  # 파일이 없으면 프로그램 종료
+        return
     except Exception as e:
         print(f"파일을 읽는 중 오류가 발생했습니다: {e}")
         return
 
-    # S&P500 지수 티커 추가 (시장 대비 변동성 계산을 위해)
     if '^GSPC' not in tickers:
-        tickers.append('^GSPC') 
-    
-    prices = get_stock_data(tickers) # 주식 데이터 다운로드
-    obj = yf.Tickers(tickers).tickers # yfinance Tickers 객체 생성 (정보 가져오기 위함)
-    
+        tickers.append('^GSPC')
+
+    prices = get_stock_data(tickers)
+    obj = yf.Tickers(tickers).tickers
+
     try:
-        stats, basis_change_rate = calculate_stats(prices, obj, tickers)
-        # ^GSPC는 통계 결과에서 제외
-        if '^GSPC' in stats:
-            del stats['^GSPC']
+        stats, _ = calculate_stats(prices, obj, tickers)
+        stats.pop('^GSPC', None)
         save_to_excel(stats)
     except Exception as e:
         print(f"통계 계산 또는 엑셀 저장 중 오류가 발생했습니다: {e}")
+
 
 if __name__ == "__main__":
     main()

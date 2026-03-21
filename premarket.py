@@ -1,5 +1,6 @@
 import os
 import warnings
+import concurrent.futures
 
 import pandas as pd
 import yfinance as yf
@@ -28,15 +29,23 @@ def fetch_latest_price(ticker: str) -> float | str:
     return "데이터 없음"
 
 
+def _process_ticker(params: tuple[int, int, str]) -> dict[str, float | str]:
+    i, total, ticker = params
+    print(f"  [{i}/{total}] {ticker}")
+    try:
+        price = fetch_latest_price(ticker)
+    except Exception as e:
+        price = f"에러: {e}"
+    return {"Ticker": ticker, "Latest Price": price}
+
+
 def build_price_table(tickers: list[str]) -> pd.DataFrame:
+    args_list = [(i, len(tickers), ticker) for i, ticker in enumerate(tickers, 1)]
     records = []
-    for i, ticker in enumerate(tickers, 1):
-        print(f"  [{i}/{len(tickers)}] {ticker}")
-        try:
-            price = fetch_latest_price(ticker)
-        except Exception as e:
-            price = f"에러: {e}"
-        records.append({"Ticker": ticker, "Latest Price": price})
+    # I/O 바운드 작업이므로 ThreadPoolExecutor를 사용하여 병렬 다운로드 수행
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        for result in executor.map(_process_ticker, args_list):
+            records.append(result)
     return pd.DataFrame(records)
 
 
