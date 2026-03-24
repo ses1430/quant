@@ -1,96 +1,130 @@
-# YouTube to Gemini Helper
+# Quant
 
-유튜브 영상을 우클릭 한 번으로 Google Gemini에게 분석 요청할 수 있는 Chrome 확장 프로그램입니다.
+개인 투자 분석을 위한 Python 도구 모음입니다. 미국·한국·글로벌 주식, 암호화폐, 환율 데이터를 수집하고, RSI·볼린저밴드 등 기술적 지표와 연도별 수익률·CAGR·베타 등 통계를 계산하여 엑셀로 출력합니다.
 
-## 소개
+## 핵심 스크립트
 
-YouTube 영상을 시청하다가 내용을 빠르게 파악하고 싶을 때, 영상 URL을 복사하고 Gemini를 열고 프롬프트를 작성하는 과정이 번거롭습니다. **YouTube to Gemini Helper**는 이 과정을 자동화하여, 우클릭 컨텍스트 메뉴 또는 영상 아래 버튼 한 번으로 Gemini가 영상을 상세히 분석해주도록 합니다.
+### price.py — 기술적 지표 + 가격 이력
 
-## 주요 기능
+`ticker.txt`에 등록된 종목의 과거 종가 데이터를 다운로드하고, 일봉·주봉·월봉 기준 RSI와 볼린저밴드 %B를 계산합니다. 캘린더 기준 일별 데이터(주말·공휴일 포함, 전일 종가로 채움)와 기술적 지표를 합쳐 `price.xlsx`로 출력합니다.
 
-**원클릭 Gemini 분석** — 유튜브 영상 위에서 우클릭 → "Gemini로 이 영상 설명하기"를 선택하면, 자동으로 Gemini 탭이 열리고 프롬프트가 입력·전송됩니다.
+```bash
+python price.py              # 기본 16년치 데이터
+python price.py --years 10   # 10년치 데이터
+```
 
-**커스텀 프롬프트** — 확장 프로그램 설정 페이지에서 Gemini에 전송할 프롬프트를 자유롭게 편집할 수 있습니다. `${url}` 플레이스홀더를 사용하면 영상 URL이 자동으로 삽입됩니다.
+### stats.py — 종목 펀더멘탈 + 연도별 수익률
 
-**상세한 기본 프롬프트** — 기본 프롬프트는 메타데이터(제목, 업로더, 길이, URL), 타임스탬프 포함 포괄적 내용 분석, 핵심 메시지 및 결론까지 구조화된 출력을 요청하도록 설계되어 있습니다.
+시가총액(USD 기준 $B, KRW 기준 억 원), 베타, Trailing/Forward PER, S&P 500 대비 상대 변동성(`beta"`) 및 2011년부터 현재까지 연도별 수익률(%)을 계산합니다. 메타데이터는 멀티스레딩으로 병렬 수집합니다.
 
-**YouTube UI 통합 버튼** — 영상 페이지의 좋아요/싫어요 버튼 옆에 "Gemini" 버튼이 자동으로 추가되어, 우클릭 없이도 바로 사용할 수 있습니다.
+```bash
+python stats.py              # ticker.txt 사용
+python stats.py stats.txt    # 한국 주식 등 다른 티커 파일 지정
+```
 
-## 설치 방법
+### premarket.py — 프리마켓/애프터마켓 가격 조회
 
-1. 이 저장소를 클론하거나 [ZIP 파일](youtube-gemini-helper.zip)을 다운로드하여 압축을 해제합니다.
-   ```bash
-   git clone https://github.com/ses1430/youtube-gemini-helper.git
-   ```
-2. Chrome 브라우저에서 `chrome://extensions/`로 이동합니다.
-3. 우측 상단의 **개발자 모드**를 활성화합니다.
-4. **압축해제된 확장 프로그램을 로드합니다** 버튼을 클릭합니다.
-5. 다운로드한 폴더(manifest.json이 있는 폴더)를 선택합니다.
+장 시작 전·후 시간 외 거래 포함 최신 가격을 1분봉 기준으로 조회합니다. 10개 스레드로 병렬 처리하여 빠르게 `premarket.xlsx`로 출력합니다.
 
-## 사용 방법
+```bash
+python premarket.py
+```
 
-### 방법 1: 컨텍스트 메뉴 (우클릭)
+### korea.py — 한국 주식 전용 분석
 
-1. YouTube에서 영상 페이지(`youtube.com/watch?v=...`)를 엽니다.
-2. 영상 플레이어 위에서 **마우스 우클릭**합니다.
-3. **"Gemini로 이 영상 설명하기"** 메뉴를 클릭합니다.
-4. Gemini 탭이 자동으로 열리고, 프롬프트가 입력·전송됩니다.
+`kor_ticker.dat` 파일의 한국 종목(ETF + 개별주)을 FinanceDataReader로 다운로드하고, RSI·볼린저밴드·180일 Historical Volatility를 계산합니다. HV는 기준 종목(삼성전자) 대비 정규화하여 상대적 변동성을 비교할 수 있습니다.
 
-### 방법 2: Gemini 버튼
+```bash
+python korea.py
+```
 
-1. YouTube 영상 페이지에서 좋아요/싫어요 버튼 옆에 나타나는 **"Gemini"** 버튼을 클릭합니다.
-2. 이후 동작은 동일합니다.
+### crypto.py — 암호화폐 지표 분석
 
-### 프롬프트 커스터마이징
+BTC, ETH, SOL, XRP, DOGE, ADA의 KRW 가격을 yfinance로 다운로드하고, 일봉·주봉·월봉 기준 RSI와 볼린저밴드 %B를 계산하여 `crypto.xlsx`로 출력합니다.
 
-1. 확장 프로그램 아이콘을 우클릭 → **옵션**을 선택하거나, `chrome://extensions/`에서 해당 확장 프로그램의 **세부정보 → 확장 프로그램 옵션**을 클릭합니다.
-2. 프롬프트를 원하는 대로 수정합니다.
-3. `${url}` 자리에 YouTube 영상 URL이 자동 삽입됩니다.
-4. **저장** 버튼을 클릭합니다.
+```bash
+python crypto.py
+```
+
+### upbit.py — 업비트 BTC 실시간 조회
+
+업비트 API를 통해 BTC 현재가, 전고점 대비 등락률, 일일 변동률, 보유 잔고 평가금액을 콘솔에 출력합니다.
+
+```bash
+python upbit.py
+```
+
+### exchange.py — 환율 조회
+
+서울외국환중개(SMBS) API에서 USD, EUR, JPY 기준 환율을 조회합니다.
+
+```bash
+python exchange.py            # 오늘 날짜 기준
+python exchange.py 2025-06-01 # 특정 날짜 지정
+```
+
+### screening/screen.py — 종목 스크리닝
+
+섹터별 티커 목록 파일을 입력받아 연도별 수익률, 1·3·5·10년 CAGR, RSI, 볼린저밴드, PER, 배당수익률, 베타 등을 한 번에 분석합니다. 미국 시장과 해외 시장을 자동 분리하여 별도 시트에 저장합니다.
+
+```bash
+python screening/screen.py screening/tech_comm.txt     # 기술/통신 섹터
+python screening/screen.py screening/healthcare.txt    # 헬스케어
+python screening/screen.py screening/japan.txt         # 일본 시장
+python screening/screen.py screening/kingdom.txt       # 영국 시장
+```
 
 ## 프로젝트 구조
 
 ```
-youtube-gemini-helper/
-├── manifest.json          # Chrome 확장 프로그램 설정 (Manifest V3)
-├── background.js          # 서비스 워커 — 컨텍스트 메뉴 생성 및 클릭 처리
-├── gemini_content.js      # Gemini 페이지에 주입되는 콘텐츠 스크립트 — 프롬프트 자동 입력·전송
-├── youtube_content.js     # YouTube 페이지에 주입되는 콘텐츠 스크립트 — Gemini 버튼 추가
-├── options.html           # 확장 프로그램 설정 페이지 UI
-├── options.js             # 설정 페이지 로직 — 프롬프트 저장/초기화
-├── styles.css             # YouTube 내 Gemini 버튼 스타일
-├── gemini_logo.png        # Gemini 로고 이미지
-├── icon*.png              # 확장 프로그램 아이콘 (16/32/48/128px)
-└── youtube-gemini-helper.zip  # 배포용 ZIP 파일
+quant/
+├── price.py                 # 기술적 지표 + 가격 이력 → price.xlsx
+├── stats.py                 # 펀더멘탈 + 연도별 수익률 → stats.xlsx
+├── premarket.py             # 프리/애프터마켓 가격 → premarket.xlsx
+├── korea.py                 # 한국 주식 분석 → kdrx.xlsx
+├── crypto.py                # 암호화폐 지표 → crypto.xlsx
+├── upbit.py                 # 업비트 BTC 실시간 조회
+├── exchange.py              # USD/EUR/JPY 환율 조회
+├── ticker.txt               # 글로벌 종목 리스트 (미국·대만·유럽·일본)
+├── stats.txt                # 한국 주식 티커 리스트 (yfinance용 .KS/.KQ)
+├── kor_ticker.dat           # 한국 종목 리스트 (종목코드 → 종목명)
+├── prompt.txt               # AI 뉴스 요약·영상 분석용 프롬프트 모음
+├── nanobanana.txt           # 이미지 생성 프롬프트
+├── screening/
+│   ├── screen.py            # 섹터별 종목 스크리닝
+│   ├── all_tickers.csv      # 전체 티커 목록
+│   ├── tech_comm.txt        # 기술/통신 (526개)
+│   ├── healthcare.txt       # 헬스케어 (438개)
+│   ├── indus_util.txt       # 산업재/유틸리티 (532개)
+│   ├── consumer.txt         # 소비재 (215개)
+│   ├── japan.txt            # 일본 시장 (500개)
+│   └── kingdom.txt          # 영국 시장 (100개)
+└── draft/
+    └── history.py           # 특정 기간 평균 종가 조회 (실험용)
 ```
 
-## 동작 원리
+## 설치
 
-1. **background.js** — 확장 프로그램 설치 시 YouTube 영상 페이지 전용 컨텍스트 메뉴를 등록합니다. 메뉴 클릭 시 현재 영상 URL을 `chrome.storage.local`에 저장한 뒤 Gemini 탭을 엽니다.
-2. **gemini_content.js** — `gemini.google.com`에서 실행되는 콘텐츠 스크립트입니다. 저장된 URL과 프롬프트 템플릿을 불러와 Gemini의 입력 필드에 자동으로 프롬프트를 채우고 전송 버튼을 클릭합니다.
-3. **youtube_content.js** — YouTube 영상 페이지에서 좋아요/싫어요 버튼 옆에 "Gemini" 버튼을 동적으로 삽입합니다. SPA 내비게이션(`yt-navigate-finish` 이벤트)에도 대응합니다.
+```bash
+pip install yfinance pandas ta xlsxwriter finance-datareader requests
+```
 
-## 기술 스택
+## 필요 환경
 
-- **Chrome Extension Manifest V3**
-- **Vanilla JavaScript** (프레임워크 없음)
-- **Chrome APIs**: `contextMenus`, `storage`, `tabs`, Content Scripts
+- Python 3.10+
+- Windows 환경 권장 (`os.startfile()`로 엑셀 자동 실행, macOS/Linux에서는 수동으로 파일을 열어야 함)
 
-## 필요 권한
+## 사용되는 기술적 지표
 
-| 권한 | 용도 |
-|------|------|
-| `contextMenus` | 우클릭 메뉴 항목 생성 |
-| `storage` | 영상 URL 및 커스텀 프롬프트 저장 |
-| `host_permissions` (youtube.com) | YouTube 페이지 접근 및 버튼 삽입 |
-| `host_permissions` (gemini.google.com) | Gemini 페이지에 프롬프트 자동 입력 |
+| 지표 | 설명 | 기본 설정 |
+|------|------|-----------|
+| RSI | 상대강도지수 (일봉/주봉/월봉) | 14일 |
+| BB %B | 볼린저밴드 내 현재가 위치 (0~100%) | 14일, 2σ |
+| HV | Historical Volatility (연율화) | 180일 |
+| beta" | S&P 500 대비 상대 변동성 | 전체 기간 |
 
-## 알려진 제한사항
+## 참고사항
 
-- Gemini 웹 UI의 DOM 구조가 변경되면 프롬프트 자동 입력이 동작하지 않을 수 있습니다.
-- 전송 버튼 선택자(`aria-label`)가 "메시지 보내기" 또는 "Send message"에 의존하므로, 다른 언어 설정에서는 동작하지 않을 수 있습니다.
-- Gemini에 로그인되어 있어야 정상 동작합니다.
-
-## 라이선스
-
-이 프로젝트는 자유롭게 사용할 수 있습니다.
+- 모든 출력은 `.xlsx` 엑셀 파일로 저장되며, Windows에서는 자동으로 열립니다.
+- `ticker.txt`를 수정하여 관심 종목을 자유롭게 추가·삭제할 수 있습니다. `#`으로 시작하는 줄은 주석 처리됩니다.
+- yfinance의 API 제한에 따라 대량 종목 조회 시 속도가 느려질 수 있습니다.
