@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import os
 from typing import Dict
 
-
 # ==================== 설정 ====================
 TICKER_FILE = 'kor_ticker.dat'
 OUTPUT_FILE = 'kdrx.xlsx'
@@ -20,7 +19,6 @@ BB_DEV = 2.0
 REFERENCE_TICKER_CODE = '005930'          # 삼성전자 (KODEX S&P500 대체)
 # ============================================
 
-
 def load_ticker_dict(file_path: str) -> Dict[str, str]:
     """kor_ticker.dat 파일 로드"""
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -28,7 +26,6 @@ def load_ticker_dict(file_path: str) -> Dict[str, str]:
             line.split('\t')[0]: line.split('\t')[1].strip()
             for line in f.readlines() if line.strip()
         }
-
 
 def download_close_data(ticker_dict: Dict[str, str], years_back: int = 5) -> pd.DataFrame:
     """종가 데이터 일괄 다운로드"""
@@ -50,19 +47,16 @@ def download_close_data(ticker_dict: Dict[str, str], years_back: int = 5) -> pd.
     print(f"✅ 종가 다운로드 완료: {data.shape[1]}개 종목")
     return data
 
-
 def fill_calendar_days(data: pd.DataFrame) -> pd.DataFrame:
     """주말/공휴일 포함 전체 날짜 채우기"""
     full_index = pd.date_range(start=data.index.min(), end=data.index.max(), freq='D')
     return data.reindex(full_index).ffill()
-
 
 def calculate_historical_volatility(prices: pd.Series, window: int = 180) -> float:
     """연율화 Historical Volatility"""
     log_ret = np.log(prices / prices.shift(1)).dropna()
     daily_vol = log_ret.rolling(window=min(window, len(log_ret))).std().iloc[-1]
     return daily_vol * np.sqrt(252) * 100
-
 
 def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.DataFrame:
     """RSI / BB / HV 계산"""
@@ -87,15 +81,12 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
     
     return pd.DataFrame(stats)
 
-
-
 def normalize_volatility(stat_df: pd.DataFrame, ref_name: str) -> pd.DataFrame:
     """KODEX S&P500 기준 HV.180 정규화"""
     if ref_name in stat_df.columns:
         stat_df.loc['HV.180'] = stat_df.loc['HV.180'] / stat_df.loc['HV.180', ref_name]
         print(f"✅ HV.180 정규화 완료 (기준: {ref_name})")
     return stat_df
-
 
 def main():
     ticker_dict = load_ticker_dict(TICKER_FILE)
@@ -131,7 +122,6 @@ def main():
     
     if os.name == 'nt':
         os.startfile(OUTPUT_FILE)
-
 
 if __name__ == "__main__":
     main()
