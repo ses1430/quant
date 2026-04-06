@@ -15,6 +15,14 @@ BB_WINDOW = 14
 BB_DEV = 2
 OUTPUT_FILE = "price.xlsx"
 
+# ── 주식 분할 수동 보정 ────────────────────────────────────────────────────────
+# 형식: "TICKER/YYYYMMDD/1:RATIO"  (해당 일자 이전 주가를 RATIO로 나눔)
+# 예시: "1629.T/20260331/1:500"  → 1629.T의 2026-03-31 이전 주가 ÷ 500
+# 데이터가 정상화되면 해당 줄만 제거하면 됨
+SPLIT_ADJUSTMENTS: list[str] = [
+    "1629.T/20260329/1:500",
+]
+
 
 # ── 유틸 ──────────────────────────────────────────────────────────────────────
 def load_tickers(path: str = "ticker.txt") -> list[str]:
@@ -36,6 +44,19 @@ def download_close(tickers: list[str], years: int) -> pd.DataFrame:
     close = raw["Close"].copy()
     close.index = close.index.tz_localize(None)
     return close
+
+
+def apply_split_adjustments(df: pd.DataFrame, adjustments: list[str]) -> pd.DataFrame:
+    """SPLIT_ADJUSTMENTS 목록을 파싱해 해당 종목/일자 이전 주가를 보정한다."""
+    df = df.copy()
+    for entry in adjustments:
+        ticker, date_str, ratio_str = entry.split("/")
+        cutoff = pd.Timestamp(date_str)
+        denominator = int(ratio_str.split(":")[1])
+        if ticker in df.columns:
+            mask = df.index <= cutoff
+            df.loc[mask, ticker] = df.loc[mask, ticker] / denominator
+    return df
 
 
 def fill_calendar_days(df: pd.DataFrame, tickers: list[str]) -> pd.DataFrame:
@@ -86,6 +107,7 @@ def main() -> None:
 
     print(f"[1/4] {len(tickers)}개 종목 다운로드 중 ({args.years}년)...")
     close = download_close(tickers, args.years)
+    close = apply_split_adjustments(close, SPLIT_ADJUSTMENTS)
 
     print("[2/4] 캘린더 일별 데이터 생성 중...")
     df_filled = fill_calendar_days(close, tickers)

@@ -16,7 +16,7 @@ RSI_WINDOW = 14
 BB_WINDOW = 14
 BB_DEV = 2.0
 
-REFERENCE_TICKER_CODE = '005930'          # 삼성전자 (KODEX S&P500 대체)
+REFERENCE_TICKER_CODE = '278530'          # KODEX 200TR
 # ============================================
 
 def load_ticker_dict(file_path: str) -> Dict[str, str]:
@@ -54,8 +54,8 @@ def fill_calendar_days(data: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_historical_volatility(prices: pd.Series, window: int = 180) -> float:
     """연율화 Historical Volatility"""
-    log_ret = np.log(prices / prices.shift(1)).dropna()
-    daily_vol = log_ret.rolling(window=min(window, len(log_ret))).std().iloc[-1]
+    simple_ret = prices.pct_change().dropna()
+    daily_vol = simple_ret.rolling(window=min(window, len(simple_ret))).std().iloc[-1]
     return daily_vol * np.sqrt(252) * 100
 
 def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.DataFrame:
@@ -70,7 +70,7 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
         monthly = series.resample('ME').last()
         
         stats[name] = {
-            'HV.180': calculate_historical_volatility(series, VOL_WINDOW_DAYS),
+            'beta"': calculate_historical_volatility(series, VOL_WINDOW_DAYS),
             'RSI.일': ta.momentum.rsi(series, window=RSI_WINDOW).iloc[-1],
             'RSI.주': ta.momentum.rsi(weekly, window=RSI_WINDOW).iloc[-1],
             'RSI.월': ta.momentum.rsi(monthly, window=RSI_WINDOW).iloc[-1],
@@ -82,15 +82,15 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
     return pd.DataFrame(stats)
 
 def normalize_volatility(stat_df: pd.DataFrame, ref_name: str) -> pd.DataFrame:
-    """KODEX S&P500 기준 HV.180 정규화"""
+    """KODEX S&P500 기준 beta" 정규화"""
     if ref_name in stat_df.columns:
-        stat_df.loc['HV.180'] = stat_df.loc['HV.180'] / stat_df.loc['HV.180', ref_name]
-        print(f"✅ HV.180 정규화 완료 (기준: {ref_name})")
+        stat_df.loc['beta"'] = stat_df.loc['beta"'] / stat_df.loc['beta"', ref_name]
+        print(f'✅ beta" 정규화 완료 (기준: {ref_name})')
     return stat_df
 
 def main():
     ticker_dict = load_ticker_dict(TICKER_FILE)
-    ref_name = ticker_dict.get(REFERENCE_TICKER_CODE, "삼성전자")
+    ref_name = ticker_dict.get(REFERENCE_TICKER_CODE, "KODEX 200TR")
     
     # 1. 데이터 다운로드 & 캘린더 채우기
     price_df = download_close_data(ticker_dict, YEARS_BACK)

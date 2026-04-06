@@ -10,6 +10,15 @@ import yfinance as yf
 # pandas의 resample('Y') 등에서 발생하는 FutureWarning 숨기기
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+# ── 주식 분할 수동 보정 ────────────────────────────────────────────────────────
+# 형식: "TICKER/YYYYMMDD/1:RATIO"  (해당 일자 이전 주가를 RATIO로 나눔)
+# 예시: "1629.T/20260329/1:500"  → 1629.T의 2026-03-29 이전 주가 ÷ 500
+# 데이터가 정상화되면 해당 줄만 제거하면 됨
+SPLIT_ADJUSTMENTS: list[str] = [
+    "1629.T/20260329/1:500",
+]
+
+
 class MarketDataProcessor:
     """환율 데이터 캐싱 및 시가총액 변환을 담당하는 클래스"""
     def __init__(self):
@@ -56,6 +65,21 @@ def read_tickers(filename: str) -> list:
     """텍스트 파일에서 티커 목록을 읽어옵니다. (주석 및 빈 줄 무시)"""
     with open(filename, 'r', encoding='utf-8') as f:
         return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+
+
+def apply_split_adjustments(prices: pd.DataFrame, adjustments: list[str]) -> pd.DataFrame:
+    """SPLIT_ADJUSTMENTS 목록을 파싱해 해당 종목/일자 이전 종가를 보정한다."""
+    prices = prices.copy()
+    close = prices['Close'].copy()
+    for entry in adjustments:
+        ticker, date_str, ratio_str = entry.split("/")
+        cutoff = pd.Timestamp(date_str)
+        denominator = int(ratio_str.split(":")[1])
+        if ticker in close.columns:
+            mask = close.index <= cutoff
+            close.loc[mask, ticker] = close.loc[mask, ticker] / denominator
+    prices['Close'] = close
+    return prices
 
 
 def fetch_stock_data(tickers: list) -> pd.DataFrame:
@@ -108,12 +132,9 @@ def calculate_statistics(prices: pd.DataFrame, ticker_infos: dict, tickers: list
     if '^GSPC' in prices['Close'].columns:
         sp500_change_rate = prices['Close']['^GSPC'].pct_change()
         if not sp500_change_rate.empty:
-            sp500_historical_volatility = sp500_change_rate.std() * (252**0.5) * 100
+            sp500_historical_volatility = sp500_change_rate.rolling(window=min(180, len(sp500_change_rate))).std().iloc[-1] * (252**0.5) * 100
 
-    for ticker in tickers:
-        if ticker == '^GSPC':
-            continue
-            
+    for ticker in tickers:           
         ticker_stats = {
             'ticker': ticker,
             'marketCap': '',
@@ -137,7 +158,7 @@ def calculate_statistics(prices: pd.DataFrame, ticker_infos: dict, tickers: list
 
         # 변동성 및 상대적 변동성(beta") 계산
         if not stock_change_rate.empty:
-            historical_volatility = stock_change_rate.std() * (252**0.5) * 100
+            historical_volatility = stock_change_rate.rolling(window=min(180, len(stock_change_rate))).std().iloc[-1] * (252**0.5) * 100
             if sp500_historical_volatility:
                 ticker_stats['beta"'] = historical_volatility / sp500_historical_volatility
 
@@ -206,6 +227,7 @@ def main():
 
     print("주가 데이터 및 메타데이터를 다운로드하는 중 (잠시만 기다려주세요)...")
     prices = fetch_stock_data(tickers)
+    prices = apply_split_adjustments(prices, SPLIT_ADJUSTMENTS)
     ticker_objs = yf.Tickers(tickers).tickers
 
     try:
