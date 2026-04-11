@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 import FinanceDataReader as fdr
+import yfinance as yf
 import ta
+import concurrent.futures
 from datetime import datetime, timedelta
 import os
 from typing import Dict
@@ -16,7 +18,7 @@ RSI_WINDOW = 14
 BB_WINDOW = 14
 BB_DEV = 2.0
 
-REFERENCE_TICKER_CODE = '278530'          # KODEX 200TR
+REFERENCE_TICKER_CODE = '278530.KS'       # KODEX 200TR
 # ============================================
 
 def load_ticker_dict(file_path: str) -> Dict[str, str]:
@@ -37,11 +39,11 @@ def download_close_data(ticker_dict: Dict[str, str], years_back: int = 5) -> pd.
     data_list = []
     for code, name in ticker_dict.items():
         try:
-            df = fdr.DataReader(code, start_date, end_date)[['Close']]
+            df = fdr.DataReader(code[:6], start_date, end_date)[['Close']]
             df.columns = [name]
             data_list.append(df)
         except Exception:
-            print(f"   ⚠️ 실패: {code} ({name})")
+            print(f"   ⚠️ 실패: {code[:6]} ({name})")
     
     data = pd.concat(data_list, axis=1)
     print(f"✅ 종가 다운로드 완료: {data.shape[1]}개 종목")
@@ -58,6 +60,30 @@ def calculate_historical_volatility(prices: pd.Series, window: int = 180) -> flo
     daily_vol = simple_ret.rolling(window=min(window, len(simple_ret))).std().iloc[-1]
     return daily_vol * np.sqrt(252) * 100
 
+def fetch_yf_data(ticker_dict: Dict[str, str]) -> pd.DataFrame:
+    """yfinance에서 시가총액·ForwardPER 병렬 조회"""
+    def _fetch(code: str, name: str):
+        try:
+            info = yf.Ticker(code).info
+            cap  = info.get('marketCap')
+            pe   = info.get('forwardPE')
+            return name, {
+                '시가총액': cap / 1e8 if cap else float('nan'),
+                'PER':   float(pe) if pe else float('nan'),
+            }
+        except Exception as e:
+            print(f"   ⚠️ {code} ({name}): {e}")
+            return name, {'시가총액': float('nan'), 'PER': float('nan')}
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(_fetch, code, name): name
+                   for code, name in ticker_dict.items()}
+        for future in concurrent.futures.as_completed(futures):
+            name, data = future.result()
+            results[name] = data
+    return pd.DataFrame(results)
+
 def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.DataFrame:
     """RSI / BB / HV 계산"""
     stats = {}
@@ -70,7 +96,7 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
         monthly = series.resample('ME').last()
         
         stats[name] = {
-            'beta"': calculate_historical_volatility(series, VOL_WINDOW_DAYS),
+            'β"': calculate_historical_volatility(series, VOL_WINDOW_DAYS),
             'RSI.일': ta.momentum.rsi(series, window=RSI_WINDOW).iloc[-1],
             'RSI.주': ta.momentum.rsi(weekly, window=RSI_WINDOW).iloc[-1],
             'RSI.월': ta.momentum.rsi(monthly, window=RSI_WINDOW).iloc[-1],
@@ -82,13 +108,14 @@ def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.
     return pd.DataFrame(stats)
 
 def normalize_volatility(stat_df: pd.DataFrame, ref_name: str) -> pd.DataFrame:
-    """KODEX S&P500 기준 beta" 정규화"""
+    """KODEX S&P500 기준 β" 정규화"""
     if ref_name in stat_df.columns:
-        stat_df.loc['beta"'] = stat_df.loc['beta"'] / stat_df.loc['beta"', ref_name]
-        print(f'✅ beta" 정규화 완료 (기준: {ref_name})')
+        stat_df.loc['β"'] = stat_df.loc['β"'] / stat_df.loc['β"', ref_name]
+        print(f'✅ β" 정규화 완료 (기준: {ref_name})')
     return stat_df
 
-def main():
+
+if __name__ == "__main__":
     ticker_dict = load_ticker_dict(TICKER_FILE)
     ref_name = ticker_dict.get(REFERENCE_TICKER_CODE, "KODEX 200TR")
     
@@ -98,9 +125,15 @@ def main():
     
     # 2. 기술적 지표 계산
     stat_df = calculate_indicators(price_df, ticker_dict)
-    
+
     # 3. Volatility 정규화
     stat_df = normalize_volatility(stat_df, ref_name)
+
+    # 4. 시가총액·PER 추가
+    print("📊 시가총액·PER 데이터 조회 중...")
+    yf_df = fetch_yf_data(ticker_dict)
+    stat_df = pd.concat([stat_df, yf_df])
+    stat_df = stat_df.reindex(['시가총액', 'β"', 'PER', 'RSI.일', 'RSI.주', 'RSI.월', 'BB.일', 'BB.주', 'BB.월'])
     
     # ==================== 핵심 수정 ====================
     # 가격 컬럼을 최근 날짜 → 과거 날짜 순으로 정렬 (엑셀 보기 편하게)
@@ -122,6 +155,3 @@ def main():
     
     if os.name == 'nt':
         os.startfile(OUTPUT_FILE)
-
-if __name__ == "__main__":
-    main()

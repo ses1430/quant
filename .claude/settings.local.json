@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c \"from pykrx import stock; import inspect; print\\(inspect.getfile\\(stock\\)\\)\")"
+      "Bash(python -c \"from pykrx import stock; import inspect; print\\(inspect.getfile\\(stock\\)\\)\")",
+      "Bash(python -c \"import FinanceDataReader as fdr; etf = fdr.StockListing\\('ETF/KR'\\); print\\(etf.columns.tolist\\(\\)\\); print\\(etf.head\\(2\\)\\)\")",
+      "Bash(python -c \"import FinanceDataReader as fdr; krx = fdr.StockListing\\('KRX'\\); print\\(krx.columns.tolist\\(\\)\\)\")",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:pypi.org)"
     ]
   }
 }
