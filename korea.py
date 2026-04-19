@@ -148,7 +148,11 @@ if __name__ == "__main__":
 
     result = combined.T
     # ==================================================
-    
+
+    # 티커 컬럼 추가 (앞 6자리, 제일 앞열)
+    name_to_ticker = {name: code[:6] for code, name in ticker_dict.items()}
+    result.insert(0, '티커', result.index.map(name_to_ticker))
+
     # 저장 및 자동 열기
     result.to_excel(OUTPUT_FILE, sheet_name='All')
     print(f"\n💾 저장 완료 → {OUTPUT_FILE} (열 순서 정상화됨)")
