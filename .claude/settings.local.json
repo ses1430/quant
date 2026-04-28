@@ -6,7 +6,16 @@
       "Bash(python -c \"import FinanceDataReader as fdr; krx = fdr.StockListing\\('KRX'\\); print\\(krx.columns.tolist\\(\\)\\)\")",
       "WebFetch(domain:github.com)",
       "WebSearch",
-      "WebFetch(domain:pypi.org)"
+      "WebFetch(domain:pypi.org)",
+      "Bash(pip show *)",
+      "Bash(python -c \"import yt_dlp; print\\('yt_dlp ok'\\)\")",
+      "Bash(python -c \"import pyannote; print\\('pyannote ok'\\)\")",
+      "Bash(pip list *)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(python -m pip show flask)",
+      "Bash(pip install *)",
+      "Bash(python -c \"import app; print\\('OK'\\)\")"
     ]
   }
 }
