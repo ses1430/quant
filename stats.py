@@ -70,15 +70,14 @@ def read_tickers(filename: str) -> list:
 def apply_split_adjustments(prices: pd.DataFrame, adjustments: list[str]) -> pd.DataFrame:
     """SPLIT_ADJUSTMENTS 목록을 파싱해 해당 종목/일자 이전 종가를 보정한다."""
     prices = prices.copy()
-    close = prices['Close'].copy()
     for entry in adjustments:
         ticker, date_str, ratio_str = entry.split("/")
         cutoff = pd.Timestamp(date_str)
         denominator = int(ratio_str.split(":")[1])
-        if ticker in close.columns:
-            mask = close.index <= cutoff
-            close.loc[mask, ticker] = close.loc[mask, ticker] / denominator
-    prices['Close'] = close
+        col_key = ('Close', ticker)
+        if col_key in prices.columns:
+            mask = prices.index <= cutoff
+            prices.loc[mask, col_key] = prices.loc[mask, col_key] / denominator
     return prices
 
 
@@ -130,9 +129,11 @@ def calculate_statistics(prices: pd.DataFrame, ticker_infos: dict, tickers: list
     # S&P 500 기준점(변동성 계산용) 추출
     sp500_historical_volatility = None
     if '^GSPC' in prices['Close'].columns:
-        sp500_change_rate = prices['Close']['^GSPC'].pct_change()
-        if not sp500_change_rate.empty:
-            sp500_historical_volatility = sp500_change_rate.rolling(window=min(180, len(sp500_change_rate))).std().iloc[-1] * (252**0.5) * 100
+        sp500_change_clean = prices['Close']['^GSPC'].pct_change().dropna()
+        if not sp500_change_clean.empty:
+            sp500_historical_volatility = sp500_change_clean.rolling(window=min(180, len(sp500_change_clean))).std().iloc[-1] * (252**0.5) * 100
+    else:
+        print("경고: ^GSPC 데이터를 가져오지 못했습니다. beta\" 계산이 불가합니다.")
 
     for ticker in tickers:           
         ticker_stats = {
@@ -157,10 +158,11 @@ def calculate_statistics(prices: pd.DataFrame, ticker_infos: dict, tickers: list
         stock_change_rate = stock_close_prices.pct_change()
 
         # 변동성 및 상대적 변동성(beta") 계산
-        if not stock_change_rate.empty:
-            historical_volatility = stock_change_rate.rolling(window=min(180, len(stock_change_rate))).std().iloc[-1] * (252**0.5) * 100
-            if sp500_historical_volatility:
-                ticker_stats['beta"'] = historical_volatility / sp500_historical_volatility
+        change_rate_clean = stock_change_rate.dropna()
+        if not change_rate_clean.empty:
+            historical_volatility = change_rate_clean.rolling(window=min(180, len(change_rate_clean))).std().iloc[-1] * (252**0.5) * 100
+            if sp500_historical_volatility is not None and not pd.isna(sp500_historical_volatility) and not pd.isna(historical_volatility):
+                ticker_stats['beta"'] = round(historical_volatility / sp500_historical_volatility, 2)
 
         # yfinance Info 기반 메타데이터 추출
         info = prefetched_infos.get(ticker, {})
