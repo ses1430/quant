@@ -1,13 +1,16 @@
 import requests
 import xml.etree.ElementTree as elemTree
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 currencies = ['USD','EUR','JPY']
 results = []
 
 if len(sys.argv) < 2:
     op_date = datetime.now().strftime('%Y-%m-%d')
+elif sys.argv[1].lstrip('-').isdigit() and sys.argv[1].startswith('-'):
+    days = int(sys.argv[1].lstrip('-'))
+    op_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
 else:
     op_date = sys.argv[1]
 
