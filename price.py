@@ -20,7 +20,7 @@ OUTPUT_FILE = "price.xlsx"
 # 예시: "1629.T/20260331/1:500"  → 1629.T의 2026-03-31 이전 주가 ÷ 500
 # 데이터가 정상화되면 해당 줄만 제거하면 됨
 SPLIT_ADJUSTMENTS: list[str] = [
-    "1629.T/20260329/1:500",
+    # "1629.T/20260329/1:500",
 ]
 
 
@@ -32,7 +32,7 @@ def load_tickers(path: str = "ticker.txt") -> list[str]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--years", type=int, default=16, help="과거 데이터 기간 (기본값: 16년)")
+    parser.add_argument("--years", type=int, default=15, help="과거 데이터 기간 (기본값: 15년)")
     return parser.parse_args()
 
 
