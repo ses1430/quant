@@ -32,7 +32,7 @@ def load_tickers(path: str = "ticker.txt") -> list[str]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--years", type=int, default=15, help="과거 데이터 기간 (기본값: 15년)")
+    parser.add_argument("-y", "--years", type=int, default=15, help="과거 데이터 기간 (기본값: 15년)")
     return parser.parse_args()
 
 
