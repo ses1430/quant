@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import FinanceDataReader as fdr
-import yfinance as yf
 import ta
+import requests
 import concurrent.futures
 from datetime import datetime, timedelta
 import os
@@ -60,29 +60,59 @@ def calculate_historical_volatility(prices: pd.Series, window: int = 180) -> flo
     daily_vol = simple_ret.rolling(window=min(window, len(simple_ret))).std().iloc[-1]
     return daily_vol * np.sqrt(252) * 100
 
-def fetch_yf_data(ticker_dict: Dict[str, str]) -> pd.DataFrame:
-    """yfinance에서 시가총액·ForwardPER 병렬 조회"""
+def fetch_naver_valuation(ticker_dict: Dict[str, str]):
+    """네이버 금융에서 시가총액·PER·추정PER·PBR·종목명(itemname) 병렬 조회"""
+    headers = {"User-Agent": "Mozilla/5.0"}
+    NAN = float('nan')
+
+    def _to_float(v):
+        try:
+            return float(v) if v not in (None, "", "-") else NAN
+        except (TypeError, ValueError):
+            return NAN
+
+    def _market_cap(v):
+        try:
+            if v in (None, "", "-"):
+                return NAN
+            return round(float(v) / 1_000_000_000_000, 1)  # 원 → 조, 소수점 1자리
+        except (TypeError, ValueError):
+            return NAN
+
+    EMPTY = {'배당수익률': NAN, '시가총액': NAN, 'PER': NAN, '추정PER': NAN, 'PBR': NAN}
+
     def _fetch(code: str, name: str):
         try:
-            info = yf.Ticker(code).info
-            cap  = info.get('marketCap')
-            pe   = info.get('forwardPE')
-            return name, {
-                '시가총액': cap / 1e8 if cap else float('nan'),
-                'PER':   float(pe) if pe else float('nan'),
-            }
+            url = f"https://stock.naver.com/api/domestic/detail/{code[:6]}/detail?codeType=KRX"
+            res = requests.get(url, headers=headers, timeout=5)
+            obj = res.json()
+            if obj.get('type') == 'EF':
+                row = dict(EMPTY)
+            else:
+                dr = _to_float(obj.get('dividendRate'))
+                row = {
+                    '배당수익률': 0.0 if pd.isna(dr) else dr,
+                    '시가총액':   _market_cap(obj.get('marketSum')),
+                    'PER':       _to_float(obj.get('per')),
+                    '추정PER':    _to_float(obj.get('estimatedPer')),
+                    'PBR':       _to_float(obj.get('pbr')),
+                }
+            return name, row, obj.get('itemname')
         except Exception as e:
             print(f"   ⚠️ {code} ({name}): {e}")
-            return name, {'시가총액': float('nan'), 'PER': float('nan')}
+            return name, dict(EMPTY), None
 
     results = {}
+    itemnames: Dict[str, str] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(_fetch, code, name): name
                    for code, name in ticker_dict.items()}
         for future in concurrent.futures.as_completed(futures):
-            name, data = future.result()
+            name, data, itemname = future.result()
             results[name] = data
-    return pd.DataFrame(results)
+            if itemname:
+                itemnames[name] = itemname
+    return pd.DataFrame(results), itemnames
 
 def calculate_indicators(data: pd.DataFrame, ticker_dict: Dict[str, str]) -> pd.DataFrame:
     """RSI / BB / HV 계산"""
@@ -129,11 +159,11 @@ if __name__ == "__main__":
     # 3. Volatility 정규화
     stat_df = normalize_volatility(stat_df, ref_name)
 
-    # 4. 시가총액·PER 추가
-    print("📊 시가총액·PER 데이터 조회 중...")
-    yf_df = fetch_yf_data(ticker_dict)
-    stat_df = pd.concat([stat_df, yf_df])
-    stat_df = stat_df.reindex(['시가총액', 'β"', 'PER', 'RSI.일', 'RSI.주', 'RSI.월', 'BB.일', 'BB.주', 'BB.월'])
+    # 4. 시가총액·PER·추정PER·PBR 추가 (네이버)
+    print("📊 시가총액·PER·추정PER·PBR 데이터 조회 중 (네이버)...")
+    naver_df, itemnames = fetch_naver_valuation(ticker_dict)
+    stat_df = pd.concat([stat_df, naver_df])
+    stat_df = stat_df.reindex(['배당수익률', '시가총액', 'PER', '추정PER', 'PBR', 'β"', 'RSI.일', 'RSI.주', 'RSI.월', 'BB.일', 'BB.주', 'BB.월'])
     
     # ==================== 핵심 수정 ====================
     # 가격 컬럼을 최근 날짜 → 과거 날짜 순으로 정렬 (엑셀 보기 편하게)
@@ -149,9 +179,12 @@ if __name__ == "__main__":
     result = combined.T
     # ==================================================
 
-    # 티커 컬럼 추가 (앞 6자리, 제일 앞열)
+    # 티커를 인덱스(제일 앞열)로, 종목명은 네이버 itemname 사용 (누락 시 파일 이름 폴백)
     name_to_ticker = {name: code[:6] for code, name in ticker_dict.items()}
-    result.insert(0, '티커', result.index.map(name_to_ticker))
+    display_name = {name: itemnames.get(name, name) for name in result.index}
+    result.insert(0, '종목명', result.index.map(display_name))
+    result.index = result.index.map(name_to_ticker)
+    result.index.name = '티커'
 
     # 저장 및 자동 열기
     result.to_excel(OUTPUT_FILE, sheet_name='All')
