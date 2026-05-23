@@ -79,7 +79,7 @@ def fetch_naver_valuation(ticker_dict: Dict[str, str]):
         except (TypeError, ValueError):
             return NAN
 
-    EMPTY = {'배당수익률': NAN, '시가총액': NAN, 'PER': NAN, '추정PER': NAN, 'PBR': NAN}
+    EMPTY = {'시총': NAN, 'PER': NAN, '추정PER': NAN, 'PBR': NAN, '연배당': NAN}
 
     def _fetch(code: str, name: str):
         try:
@@ -89,13 +89,12 @@ def fetch_naver_valuation(ticker_dict: Dict[str, str]):
             if obj.get('type') == 'EF':
                 row = dict(EMPTY)
             else:
-                dr = _to_float(obj.get('dividendRate'))
                 row = {
-                    '배당수익률': 0.0 if pd.isna(dr) else dr,
-                    '시가총액':   _market_cap(obj.get('marketSum')),
+                    '시총':   _market_cap(obj.get('marketSum')),
                     'PER':       _to_float(obj.get('per')),
                     '추정PER':    _to_float(obj.get('estimatedPer')),
                     'PBR':       _to_float(obj.get('pbr')),
+                    '연배당':     _to_float(obj.get('dividendAmount')),
                 }
             return name, row, obj.get('itemname')
         except Exception as e:
@@ -163,7 +162,7 @@ if __name__ == "__main__":
     print("📊 시가총액·PER·추정PER·PBR 데이터 조회 중 (네이버)...")
     naver_df, itemnames = fetch_naver_valuation(ticker_dict)
     stat_df = pd.concat([stat_df, naver_df])
-    stat_df = stat_df.reindex(['배당수익률', '시가총액', 'PER', '추정PER', 'PBR', 'β"', 'RSI.일', 'RSI.주', 'RSI.월', 'BB.일', 'BB.주', 'BB.월'])
+    stat_df = stat_df.reindex(['연배당', '시총', 'PER', '추정PER', 'PBR', 'β"', 'RSI.일', 'RSI.주', 'RSI.월', 'BB.일', 'BB.주', 'BB.월'])
     
     # ==================== 핵심 수정 ====================
     # 가격 컬럼을 최근 날짜 → 과거 날짜 순으로 정렬 (엑셀 보기 편하게)

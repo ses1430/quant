@@ -13,6 +13,8 @@ def get_naver_valuation(ticker):
     return json.loads(res.text)
 
 # 사용 예
-print(get_naver_valuation("042660"))
+print(get_naver_valuation("005930"))
+print('---------------------------')
+print(get_naver_valuation("0117V0"))
 print('---------------------------')
 print(get_naver_valuation("475080"))
